@@ -1,31 +1,16 @@
 package com.aariyan.chatbasedauthenticationsystem
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Button
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.aariyan.chatbasedauthenticationsystem.ui.theme.ChatBasedAuthenticationSystemTheme
 
 //@Composable
@@ -74,7 +59,7 @@ fun PreviewLoadingScreen() {
                 .fillMaxSize()
                 .background(Color.White)
                 .padding(15.dp)){
-                AskIfAccountExistsScreen(onResponse = {})
+                AskIfAccountExistsScreen()
             }
 
         }
@@ -82,125 +67,125 @@ fun PreviewLoadingScreen() {
 }
 
 @Composable
-fun PasswordRetryScreen(onRetry: (String) -> Unit) {
-    Column {
-        Text("Please retry your password:")
-        var password by remember { mutableStateOf("") }
-        TextField(value = password, onValueChange = { password = it })
-        Button(onClick = { onRetry(password) }) {
-            Text("Retry")
-        }
-    }
+fun PasswordRetryScreen() {
+//    Column {
+//        Text("Please retry your password:")
+//        var password by remember { mutableStateOf("") }
+//        TextField(value = password, onValueChange = { password = it })
+//        Button(onClick = { onRetry(password) }) {
+//            Text("Retry")
+//        }
+//    }
 }
 
 @Composable
-fun PasswordResetScreen(onReset: (String) -> Unit) {
-    Column {
-        Text("Enter your new password:")
-        var newPassword by remember { mutableStateOf("") }
-        TextField(value = newPassword, onValueChange = { newPassword = it })
-        Button(onClick = { onReset(newPassword) }) {
-            Text("Reset Password")
-        }
-    }
+fun PasswordResetScreen() {
+//    Column {
+//        Text("Enter your new password:")
+//        var newPassword by remember { mutableStateOf("") }
+//        TextField(value = newPassword, onValueChange = { newPassword = it })
+//        Button(onClick = { onReset(newPassword) }) {
+//            Text("Reset Password")
+//        }
+//    }
 }
 
 @Composable
-fun WaitForOTPScreen(onOTPSubmitted: (String) -> Unit) {
-    Column {
-        Text("Enter OTP:")
-        var otp by remember { mutableStateOf("") }
-        TextField(value = otp, onValueChange = { otp = it })
-        Button(onClick = { onOTPSubmitted(otp) }) {
-            Text("Submit OTP")
-        }
-    }
+fun WaitForOTPScreen() {
+//    Column {
+//        Text("Enter OTP:")
+//        var otp by remember { mutableStateOf("") }
+//        TextField(value = otp, onValueChange = { otp = it })
+//        Button(onClick = { onOTPSubmitted(otp) }) {
+//            Text("Submit OTP")
+//        }
+//    }
 }
 
 @Composable
-fun AccountCreationScreen(onContinue: (String) -> Unit) {
-    Column {
-        Text("Let's create your account.")
-        Button(onClick = { onContinue("Continue") }) {
-            Text("Continue")
-        }
-    }
+fun AccountCreationScreen() {
+//    Column {
+//        Text("Let's create your account.")
+//        Button(onClick = { onContinue("Continue") }) {
+//            Text("Continue")
+//        }
+//    }
 }
 
 @Composable
-fun AskForNameScreen(onNameEntered: (String) -> Unit) {
-    Column {
-        Text("What's your name?")
-        var name by remember { mutableStateOf("") }
-        TextField(value = name, onValueChange = { name = it })
-        Button(onClick = { onNameEntered(name) }) {
-            Text("Submit Name")
-        }
-    }
+fun AskForNameScreen() {
+//    Column {
+//        Text("What's your name?")
+//        var name by remember { mutableStateOf("") }
+//        TextField(value = name, onValueChange = { name = it })
+//        Button(onClick = { onNameEntered(name) }) {
+//            Text("Submit Name")
+//        }
+//    }
 }
 
 @Composable
-fun AskForGenderScreen(onGenderSelected: (String) -> Unit) {
-    Column {
-        Text("Select your gender:")
-        Button(onClick = { onGenderSelected("Male") }) {
-            Text("Male")
-        }
-        Button(onClick = { onGenderSelected("Female") }) {
-            Text("Female")
-        }
-    }
+fun AskForGenderScreen() {
+//    Column {
+//        Text("Select your gender:")
+//        Button(onClick = { onGenderSelected("Male") }) {
+//            Text("Male")
+//        }
+//        Button(onClick = { onGenderSelected("Female") }) {
+//            Text("Female")
+//        }
+//    }
 }
 
 @Composable
-fun AskForClassScreen(onClassSelected: (String) -> Unit) {
-    Column {
-        Text("What's your class?")
-        // Example: Simple buttons for class selection
-        Button(onClick = { onClassSelected("Class 10") }) {
-            Text("Class 10")
-        }
-    }
+fun AskForClassScreen() {
+//    Column {
+//        Text("What's your class?")
+//        // Example: Simple buttons for class selection
+//        Button(onClick = { onClassSelected("Class 10") }) {
+//            Text("Class 10")
+//        }
+//    }
 }
 
 @Composable
-fun AskForDivisionOrSectionScreen(onDivisionOrSectionSelected: (String) -> Unit) {
-    Column {
-        Text("Select your division or section:")
-        Button(onClick = { onDivisionOrSectionSelected("Science") }) {
-            Text("Science")
-        }
-        Button(onClick = { onDivisionOrSectionSelected("Commerce") }) {
-            Text("Commerce")
-        }
-        Button(onClick = { onDivisionOrSectionSelected("Arts") }) {
-            Text("Arts")
-        }
-    }
+fun AskForDivisionOrSectionScreen() {
+//    Column {
+//        Text("Select your division or section:")
+//        Button(onClick = { onDivisionOrSectionSelected("Science") }) {
+//            Text("Science")
+//        }
+//        Button(onClick = { onDivisionOrSectionSelected("Commerce") }) {
+//            Text("Commerce")
+//        }
+//        Button(onClick = { onDivisionOrSectionSelected("Arts") }) {
+//            Text("Arts")
+//        }
+//    }
 }
 
 @Composable
-fun AskForBatchScreen(onBatchSelected: (String) -> Unit) {
-    Column {
-        Text("What's your batch year?")
-        var batch by remember { mutableStateOf("") }
-        TextField(value = batch, onValueChange = { batch = it })
-        Button(onClick = { onBatchSelected(batch) }) {
-            Text("Submit Batch")
-        }
-    }
+fun AskForBatchScreen() {
+//    Column {
+//        Text("What's your batch year?")
+//        var batch by remember { mutableStateOf("") }
+//        TextField(value = batch, onValueChange = { batch = it })
+//        Button(onClick = { onBatchSelected(batch) }) {
+//            Text("Submit Batch")
+//        }
+//    }
 }
 
 @Composable
-fun SetPasswordScreen(onPasswordSet: (String) -> Unit) {
-    Column {
-        Text("Set your password:")
-        var password by remember { mutableStateOf("") }
-        TextField(value = password, onValueChange = { password = it })
-        Button(onClick = { onPasswordSet(password) }) {
-            Text("Set Password")
-        }
-    }
+fun SetPasswordScreen() {
+//    Column {
+//        Text("Set your password:")
+//        var password by remember { mutableStateOf("") }
+//        TextField(value = password, onValueChange = { password = it })
+//        Button(onClick = { onPasswordSet(password) }) {
+//            Text("Set Password")
+//        }
+//    }
 }
 
 @Composable
@@ -217,7 +202,29 @@ fun GreetingScreen(yesBtn: () -> Unit, noBtn: () -> Unit) {
 }
 
 @Composable
-fun AskIfAccountExistsScreen(onResponse: (String) -> Unit) {
+fun UnregisterUserPhoneNumberScree() {
+    BubbleWithIcon(isUserMessage = false) {
+        UnregisterUserWaitingNumberScreenComponent()
+    }
+}
+
+@Composable
+fun SendOTPScreen(viewModel: ChatViewModel) {
+    BubbleWithIcon(isUserMessage = false) {
+        SendOTPScreenComponent("+8801732394777", viewModel)
+    }
+}
+
+@Composable
+fun OTPValidationCompletedScreen(onStart: ()-> Unit) {
+    BubbleWithIcon(isUserMessage = false) {
+        OTPValidationCompletedComponent(onStart = {onStart()})
+    }
+}
+
+
+@Composable
+fun AskIfAccountExistsScreen() {
 //    BubbleWithIcon(isUserMessage = false) {
 //        AskIfAccountExistsScreenComponent()
 //    }
@@ -226,7 +233,7 @@ fun AskIfAccountExistsScreen(onResponse: (String) -> Unit) {
 
 
 @Composable
-fun WaitForPhoneNumberScreen(onPhoneNumberEntered: (String) -> Unit) {
+fun WaitForPhoneNumberScreen() {
     BubbleWithIcon(isUserMessage = false) {
         AskIfAccountExistsScreenComponent()
     }
@@ -234,7 +241,7 @@ fun WaitForPhoneNumberScreen(onPhoneNumberEntered: (String) -> Unit) {
 
 
 @Composable
-fun AskForPasswordScreen(onPasswordEntered: (String) -> Unit) {
+fun AskForPasswordScreen() {
     BubbleWithIcon(isUserMessage = false) {
         AskForPasswordScreenComponent()
     }

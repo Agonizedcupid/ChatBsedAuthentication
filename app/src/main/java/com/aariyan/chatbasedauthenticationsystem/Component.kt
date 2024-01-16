@@ -18,6 +18,8 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -33,13 +35,13 @@ import androidx.compose.ui.unit.sp
 import com.aariyan.chatbasedauthenticationsystem.ui.theme.ChatBasedAuthenticationSystemTheme
 
 @Composable
-fun GreetingComponent(yesBtn: ()-> Unit, noBtn: ()-> Unit) {
+fun GreetingComponent(yesBtn: () -> Unit, noBtn: () -> Unit) {
     Column(
         modifier = Modifier
             .padding(15.dp)
             .fillMaxWidth()
             .background(Color(0xffEEF8F5), RoundedCornerShape(8.dp)),
-            //.padding(16.dp),
+        //.padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
@@ -56,18 +58,38 @@ fun GreetingComponent(yesBtn: ()-> Unit, noBtn: ()-> Unit) {
 
         Text(
             text = "তোমার কি উৎকর্ষ একাউন্ট আছে?",
-            style = TextStyle(color = Color(0xff52B69A), fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            style = TextStyle(
+                color = Color(0xff52B69A),
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold
+            )
         )
 
-        Row (modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 5.dp), horizontalArrangement = Arrangement.SpaceBetween){
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 5.dp), horizontalArrangement = Arrangement.SpaceBetween
+        ) {
             ElevatedButton(modifier = Modifier.weight(1f), onClick = { yesBtn() }) {
-                Text(text = "হ্যাঁ", style = TextStyle(color = Color(0xff52B69A), fontSize = 16.sp, fontWeight = FontWeight.Bold))
+                Text(
+                    text = "হ্যাঁ",
+                    style = TextStyle(
+                        color = Color(0xff52B69A),
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                )
             }
             Spacer(modifier = Modifier.padding(start = 25.dp))
             ElevatedButton(modifier = Modifier.weight(1f), onClick = { noBtn() }) {
-                Text(text = "না", style = TextStyle(color = Color(0xff52B69A), fontSize = 16.sp, fontWeight = FontWeight.Bold))
+                Text(
+                    text = "না",
+                    style = TextStyle(
+                        color = Color(0xff52B69A),
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                )
             }
         }
     }
@@ -87,6 +109,114 @@ fun AskIfAccountExistsScreenComponent() {
     }
 
     Text(text = text, style = TextStyle(color = Color(0xff71828A)))
+}
+
+@Composable
+fun UnregisterUserWaitingNumberScreenComponent() {
+    val text = buildAnnotatedString {
+        append("ধন্যবাদ, একাউন্টে প্রবেশ করতে তোমার")
+
+        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold, color = Color(0xff52B69A))) {
+            append(" ফোন নম্বরটি ")
+        }
+
+        append("দাও প্লিজ...")
+    }
+
+    Text(text = text, style = TextStyle(color = Color(0xff71828A)))
+}
+
+@Composable
+fun SendOTPScreenComponent(phoneNumber: String, viewModel: ChatViewModel) {
+    val otpTimerFinished by viewModel.otpTimerFinished.collectAsState()
+    val timeLeft = viewModel.otpTimerValue.collectAsState()
+
+    val text = "ধন্যবাদ! ${phoneNumber} এই নম্বরে প্রেরিত কোডটি মেয়াদ উত্তীর্ণ হওয়ার আগে লিখো।"
+
+    Column(
+        modifier = Modifier
+            //.padding(15.dp)
+            .fillMaxWidth()
+            .background(Color(0xffEEF8F5), RoundedCornerShape(8.dp))
+            .padding(5.dp),
+        horizontalAlignment = Alignment.Start
+    ) {
+
+        Text(
+            text = text,
+            style = TextStyle(color = Color(0xff71828A), fontSize = 16.sp)
+        )
+
+        Spacer(modifier = Modifier.padding(top = 25.dp))
+
+        Text(
+            text = "কোডটির মেয়াদ ${timeLeft.value / 60}:${timeLeft.value % 60}",
+            style = TextStyle(color = Color.Red, fontSize = 16.sp)
+        )
+
+        if (otpTimerFinished) {
+            ElevatedButton(modifier = Modifier.fillMaxWidth(), onClick = {
+                viewModel.resendOtp()
+            }) {
+                Text(
+                    text = "নতুন কোড চাই",
+                    style = TextStyle(
+                        color = Color(0xff52B69A),
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                )
+            }
+        }
+
+    }
+}
+
+@Composable
+fun OTPValidationCompletedComponent(onStart: () -> Unit) {
+
+    val text =
+        "ধন্যবাদ, নিবন্ধনের প্রথম ধাপ সম্পন্ন হয়েছে, দ্বিতীয় ধাপে তোমার প্রোফাইল আপডেট করতে কিছু তথ্য প্রয়োজন"
+
+    Column(
+        modifier = Modifier
+            //.padding(15.dp)
+            .fillMaxWidth()
+            .background(Color(0xffEEF8F5), RoundedCornerShape(8.dp))
+            .padding(5.dp),
+        horizontalAlignment = Alignment.Start
+    ) {
+
+        Text(
+            text = text,
+            style = TextStyle(color = Color(0xff71828A), fontSize = 16.sp)
+        )
+
+        Spacer(modifier = Modifier.padding(top = 25.dp))
+
+
+        ElevatedButton(modifier = Modifier.fillMaxWidth(), onClick = {
+            onStart()
+        }) {
+            Text(
+                text = "ঠিক আছে, শুরু করা যাক...",
+                style = TextStyle(
+                    color = Color(0xff52B69A),
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            )
+        }
+
+    }
+}
+
+@Preview
+@Composable
+fun PreviewSendOTPScreenComponent() {
+    ChatBasedAuthenticationSystemTheme {
+        OTPValidationCompletedComponent(onStart = {})
+    }
 }
 
 @Composable
@@ -124,6 +254,7 @@ fun PreviewGreetingComponent() {
 enum class KeyBoardInputType {
     TEXT, PHONE, PASSWORD, EMAIL, NUMBER
 }
+
 @Composable
 fun CustomEditText(
     value: String,
@@ -133,7 +264,7 @@ fun CustomEditText(
     inputType: KeyBoardInputType = KeyBoardInputType.TEXT
 ) {
 
-    val keyboardType = when(inputType) {
+    val keyboardType = when (inputType) {
         KeyBoardInputType.TEXT -> KeyboardType.Text
         KeyBoardInputType.PHONE -> KeyboardType.Phone
         KeyBoardInputType.PASSWORD -> KeyboardType.Password

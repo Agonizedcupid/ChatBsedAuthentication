@@ -9,12 +9,18 @@ import androidx.compose.ui.text.withStyle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import javax.inject.Inject
+
+enum class ResponseType {
+    YES, NO
+}
 
 class ChatViewModel : ViewModel() {
 
@@ -28,11 +34,41 @@ class ChatViewModel : ViewModel() {
     private val _showTypingIndicator = MutableStateFlow(false)
     val showTypingIndicator: StateFlow<Boolean> = _showTypingIndicator
 
+    private val _otpTimerFinished = MutableStateFlow(false)
+    val otpTimerFinished: StateFlow<Boolean> = _otpTimerFinished
+
+    private val _otpTimerValue = MutableStateFlow(20) // 120 seconds for 2 minutes
+    val otpTimerValue: StateFlow<Int> = _otpTimerValue
+
+
+    fun sendOtp() {
+        startOtpTimer()
+    }
+
+    private fun startOtpTimer() {
+        viewModelScope.launch {
+            for (time in 20 downTo 0) {
+                Log.d("OtpTimer", "Time left: $time seconds")
+                _otpTimerValue.value = time
+                delay(1000)
+            }
+            _otpTimerFinished.value = true
+        }
+    }
+
+    fun resendOtp() {
+        // Logic to resend OTP
+        _otpTimerFinished.value = false // Reset the timer
+        startOtpTimer() // Start the timer again
+    }
+
 
     val showTextField: StateFlow<Boolean> = chatState.map { state ->
         when (state) {
             is ChatUiState.WaitForPhoneNumber,
-            is ChatUiState.AskForPassword
+            is ChatUiState.AskForPassword,
+            is ChatUiState.WaitForPhoneNumberForUnRegisterUser,
+            is ChatUiState.SendOTP
             -> true
 
             else -> false
@@ -41,14 +77,18 @@ class ChatViewModel : ViewModel() {
 
 
     // Handle user input based on the current state
-    fun handleUserInput(input: String) {
+    fun handleUserInput(input: String, responseType: ResponseType = ResponseType.YES) {
         //appendSystemMessage("adfgsdfsdfgsdfg", false)
         when (val currentState = _chatState.value) {
             ChatUiState.Greeting -> {
                 appendSystemMessage("তোমার কি উৎকর্ষ একাউন্ট আছে?", isUserMessage = false)
                 _messages.value += Message(input, true)
                 //_chatState.value = ChatUiState.AskIfAccountExists
-                _chatState.value = ChatUiState.WaitForPhoneNumber("")
+                if (responseType == ResponseType.YES) {
+                    _chatState.value = ChatUiState.WaitForPhoneNumber("")
+                } else {
+                    _chatState.value = ChatUiState.WaitForPhoneNumberForUnRegisterUser("")
+                }
             }
 
             ChatUiState.AskIfAccountExists -> {
@@ -94,7 +134,12 @@ class ChatViewModel : ViewModel() {
                 val text = buildAnnotatedString {
                     append("ধন্যবাদ, তোমার ফোন নম্বরটির বিপরীতে আমরা একটি একাউন্ট সনাক্ত করতে পেরেছি। এখন")
 
-                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold, color = Color(0xff52B69A))) {
+                    withStyle(
+                        style = SpanStyle(
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xff52B69A)
+                        )
+                    ) {
                         append(" পাসওয়ার্ড ")
                     }
 
@@ -206,6 +251,51 @@ class ChatViewModel : ViewModel() {
 
             is ChatUiState.Success -> {
                 Log.d("REMAINING_OPERATION", "SUCCESS")
+            }
+
+            is ChatUiState.WaitForPhoneNumberForUnRegisterUser -> {
+                val text = buildAnnotatedString {
+                    append("ধন্যবাদ, একাউন্টে প্রবেশ করতে তোমার")
+
+                    withStyle(
+                        style = SpanStyle(
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xff52B69A)
+                        )
+                    ) {
+                        append(" ফোন নম্বরটি ")
+                    }
+
+                    append("দাও প্লিজ...")
+                }
+                appendSystemMessage(text.toString(), isUserMessage = false)
+                _messages.value += Message(input, true)
+
+                val phoneNumberExists = !checkPhoneNumberExists(input)
+
+                if (phoneNumberExists) {
+                    _chatState.value = ChatUiState.AskForPassword("")
+                    //appendSystemMessage("Please enter your password:", isUserMessage = false)
+
+                } else {
+                    // If phone number does not exist, start account creation
+                    _chatState.value = ChatUiState.SendOTP
+                    //appendSystemMessage("Let's create your account. What is your name?", isUserMessage = false)
+
+                }
+            }
+
+            is ChatUiState.SendOTP -> {
+                val text = "ধন্যবাদ! এই নম্বরে প্রেরিত কোডটি মেয়াদ উত্তীর্ণ হওয়ার আগে লিখো।"
+                appendSystemMessage(text.toString(), isUserMessage = false)
+                _messages.value += Message(input, true)
+                _chatState.value = ChatUiState.OTPValidationCompleted
+            }
+
+            is ChatUiState.OTPValidationCompleted -> {
+                val text = "ধন্যবাদ, নিবন্ধনের প্রথম ধাপ সম্পন্ন হয়েছে, দ্বিতীয় ধাপে তোমার প্রোফাইল আপডেট করতে কিছু তথ্য প্রয়োজন"
+                appendSystemMessage(text.toString(), isUserMessage = false)
+                _messages.value += Message(input, true)
             }
         }
     }
@@ -390,11 +480,14 @@ sealed interface ChatUiState {
     object Greeting : ChatUiState
     object AskIfAccountExists : ChatUiState
     data class WaitForPhoneNumber(val message: String) : ChatUiState
+    data class WaitForPhoneNumberForUnRegisterUser(val message: String) : ChatUiState
     data class AskForPassword(val message: String) : ChatUiState
     object PasswordRetry : ChatUiState
     object PasswordReset : ChatUiState
     object WaitForOTP : ChatUiState
+    object SendOTP : ChatUiState
     object AccountCreation : ChatUiState
+    object OTPValidationCompleted: ChatUiState
     data class AskForName(val message: String) : ChatUiState
     object AskForGender : ChatUiState
     object AskForClass : ChatUiState

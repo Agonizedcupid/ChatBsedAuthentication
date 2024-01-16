@@ -13,7 +13,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Divider
@@ -22,18 +21,15 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -136,29 +132,42 @@ fun ChatBased() {
             is ChatUiState.Loading -> LoadingScreen()
             is ChatUiState.Greeting -> GreetingScreen(
                 yesBtn = {
-                    viewModel.handleUserInput("জি, আমার একাউন্ট আছে!")
+                    viewModel.handleUserInput(
+                        "জি, আমার একাউন্ট আছে!",
+                        responseType = ResponseType.YES
+                    )
                 },
                 noBtn = {
-                    viewModel.handleUserInput("দুঃখিত, আমার কোনো একাউন্ট নেই!")
+                    viewModel.handleUserInput(
+                        "দুঃখিত, আমার কোনো একাউন্ট নেই!",
+                        responseType = ResponseType.NO
+                    )
                 }
             )
 
-            is ChatUiState.AskIfAccountExists -> AskIfAccountExistsScreen(viewModel::handleUserInput)
-            is ChatUiState.WaitForPhoneNumber -> WaitForPhoneNumberScreen(viewModel::handleUserInput)
-            is ChatUiState.AskForPassword -> AskForPasswordScreen(viewModel::handleUserInput)
-            is ChatUiState.PasswordRetry -> PasswordRetryScreen(viewModel::handleUserInput)
-            is ChatUiState.PasswordReset -> PasswordResetScreen(viewModel::handleUserInput)
-            is ChatUiState.WaitForOTP -> WaitForOTPScreen(viewModel::handleUserInput)
-            is ChatUiState.AccountCreation -> AccountCreationScreen(viewModel::handleUserInput)
-            is ChatUiState.AskForName -> AskForNameScreen(viewModel::handleUserInput)
-            is ChatUiState.AskForGender -> AskForGenderScreen(viewModel::handleUserInput)
-            is ChatUiState.AskForClass -> AskForClassScreen(viewModel::handleUserInput)
-            is ChatUiState.AskForDivisionOrSection -> AskForDivisionOrSectionScreen(viewModel::handleUserInput)
-            is ChatUiState.AskForBatch -> AskForBatchScreen(viewModel::handleUserInput)
-            is ChatUiState.SetPassword -> SetPasswordScreen(viewModel::handleUserInput)
+            is ChatUiState.AskIfAccountExists -> AskIfAccountExistsScreen()
+            is ChatUiState.WaitForPhoneNumber -> WaitForPhoneNumberScreen()
+            is ChatUiState.AskForPassword -> AskForPasswordScreen()
+            is ChatUiState.PasswordRetry -> PasswordRetryScreen()
+            is ChatUiState.PasswordReset -> PasswordResetScreen()
+            is ChatUiState.WaitForOTP -> WaitForOTPScreen()
+            is ChatUiState.AccountCreation -> AccountCreationScreen()
+            is ChatUiState.AskForName -> AskForNameScreen()
+            is ChatUiState.AskForGender -> AskForGenderScreen()
+            is ChatUiState.AskForClass -> AskForClassScreen()
+            is ChatUiState.AskForDivisionOrSection -> AskForDivisionOrSectionScreen()
+            is ChatUiState.AskForBatch -> AskForBatchScreen()
+            is ChatUiState.SetPassword -> SetPasswordScreen()
             is ChatUiState.AuthenticationComplete -> AuthenticationCompleteScreen()
             is ChatUiState.Error -> ErrorScreen((chatState as ChatUiState.Error).exception.message)
             is ChatUiState.Success -> SuccessScreen((chatState as ChatUiState.Success).message)
+            is ChatUiState.WaitForPhoneNumberForUnRegisterUser -> UnregisterUserPhoneNumberScree()
+            is ChatUiState.SendOTP -> SendOTPScreen(viewModel)
+            ChatUiState.OTPValidationCompleted -> OTPValidationCompletedScreen(
+                onStart = {
+                    viewModel.handleUserInput(input = "ঠিক আছে, শুরু করা যাক...")
+                }
+            )
         }
 
         if (showTextField) {
@@ -182,7 +191,10 @@ fun ChatBased() {
 
                 Spacer(modifier = Modifier.padding(start = 5.dp))
 
-                if (chatState is ChatUiState.WaitForPhoneNumber) {
+                if (chatState is ChatUiState.WaitForPhoneNumber ||
+                    chatState is ChatUiState.WaitForPhoneNumberForUnRegisterUser ||
+                    chatState is ChatUiState.SendOTP
+                ) {
                     CustomEditText(
                         modifier = Modifier.weight(1f),
                         value = textInput,
@@ -221,6 +233,17 @@ fun ChatBased() {
                             }
 
                         } else if (chatState is ChatUiState.AskForPassword) {
+                            viewModel.handleUserInput(textInput)
+                        } else if (chatState is ChatUiState.WaitForPhoneNumberForUnRegisterUser) {
+                            if (!isValidPhoneNumber(textInput.trim())) {
+                                viewModel.handleUserInput(textInput)
+                                textInput = ""
+                                viewModel.sendOtp()
+                            } else {
+                                Toast.makeText(context, "ফোন নম্বর বৈধ নয়", Toast.LENGTH_SHORT)
+                                    .show()
+                            }
+                        } else if (chatState is ChatUiState.SendOTP) {
                             viewModel.handleUserInput(textInput)
                         }
                     }
@@ -436,6 +459,7 @@ suspend fun simulateTypingResponse(
 
     showTypingIndicator.value = false
 }
+
 //
 //
 //@Composable
