@@ -1,7 +1,6 @@
 package com.aariyan.chatbasedauthenticationsystem
 
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -38,6 +37,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.aariyan.chatbasedauthenticationsystem.ui.theme.ChatBasedAuthenticationSystemTheme
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.math.max
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -119,59 +119,96 @@ fun ChatBased() {
     val messages by viewModel.messages.collectAsState()
     val showTextField by viewModel.showTextField.collectAsState()
     var textInput by remember { mutableStateOf("") }
+    var selectedGender by remember { mutableStateOf("ছেলে") }
+    var selectedClass by remember { mutableStateOf("") }
+    var selectedSection by remember { mutableStateOf("") }
 
     val context = LocalContext.current
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(start = 15.dp, end = 15.dp, top = 10.dp)
-    ) {
-        MessagesList(messages = messages)
-        when (chatState) {
-            is ChatUiState.Loading -> LoadingScreen()
-            is ChatUiState.Greeting -> GreetingScreen(
-                yesBtn = {
-                    viewModel.handleUserInput(
-                        "জি, আমার একাউন্ট আছে!",
-                        responseType = ResponseType.YES
-                    )
-                },
-                noBtn = {
-                    viewModel.handleUserInput(
-                        "দুঃখিত, আমার কোনো একাউন্ট নেই!",
-                        responseType = ResponseType.NO
-                    )
-                }
-            )
+    Column {
+        LazyColumn(
+            modifier = Modifier
+                .weight(1f)
+                .padding(start = 15.dp, end = 15.dp, top = 10.dp, bottom = 15.dp)
+        ) {
 
-            is ChatUiState.AskIfAccountExists -> AskIfAccountExistsScreen()
-            is ChatUiState.WaitForPhoneNumber -> WaitForPhoneNumberScreen()
-            is ChatUiState.AskForPassword -> AskForPasswordScreen()
-            is ChatUiState.PasswordRetry -> PasswordRetryScreen()
-            is ChatUiState.PasswordReset -> PasswordResetScreen()
-            is ChatUiState.WaitForOTP -> WaitForOTPScreen()
-            is ChatUiState.AccountCreation -> AccountCreationScreen()
-            is ChatUiState.AskForName -> AskForNameScreen()
-            is ChatUiState.AskForGender -> AskForGenderScreen()
-            is ChatUiState.AskForClass -> AskForClassScreen()
-            is ChatUiState.AskForDivisionOrSection -> AskForDivisionOrSectionScreen()
-            is ChatUiState.AskForBatch -> AskForBatchScreen()
-            is ChatUiState.SetPassword -> SetPasswordScreen()
-            is ChatUiState.AuthenticationComplete -> AuthenticationCompleteScreen()
-            is ChatUiState.Error -> ErrorScreen((chatState as ChatUiState.Error).exception.message)
-            is ChatUiState.Success -> SuccessScreen((chatState as ChatUiState.Success).message)
-            is ChatUiState.WaitForPhoneNumberForUnRegisterUser -> UnregisterUserPhoneNumberScree()
-            is ChatUiState.SendOTP -> SendOTPScreen(viewModel)
-            ChatUiState.OTPValidationCompleted -> OTPValidationCompletedScreen(
-                onStart = {
-                    viewModel.handleUserInput(input = "ঠিক আছে, শুরু করা যাক...")
+            items(messages) { message ->
+                ChatBubble(message.text, isUserMessage = message.isUserMessage)
+            }
+
+            item {
+                when (chatState) {
+                    is ChatUiState.Loading -> LoadingScreen()
+                    is ChatUiState.Greeting -> GreetingScreen(
+                        yesBtn = {
+                            viewModel.handleUserInput(
+                                "জি, আমার একাউন্ট আছে!",
+                                responseType = ResponseType.YES
+                            )
+                        },
+                        noBtn = {
+                            viewModel.handleUserInput(
+                                "দুঃখিত, আমার কোনো একাউন্ট নেই!",
+                                responseType = ResponseType.NO
+                            )
+                        }
+                    )
+
+                    is ChatUiState.AskForName -> AskForNameScreen(
+                        textInput,
+                        selectedGender,
+                        onGenderSelected = { newGender ->
+                            selectedGender = newGender
+                            viewModel.updateGender(newGender)
+                        })
+
+                    is ChatUiState.AskIfAccountExists -> AskIfAccountExistsScreen()
+                    is ChatUiState.WaitForPhoneNumber -> WaitForPhoneNumberScreen()
+                    is ChatUiState.AskForPassword -> AskForPasswordScreen()
+                    is ChatUiState.PasswordRetry -> PasswordRetryScreen()
+                    is ChatUiState.PasswordReset -> PasswordResetScreen()
+                    is ChatUiState.WaitForOTP -> WaitForOTPScreen()
+                    is ChatUiState.AccountCreation -> AccountCreationScreen()
+                    is ChatUiState.AskForGender -> AskForGenderScreen()
+                    is ChatUiState.AskForClass -> AskForClassScreen()
+                    is ChatUiState.AskForDivisionOrSection -> AskForDivisionOrSectionScreen()
+                    is ChatUiState.AskForBatch -> AskForBatchScreen()
+                    is ChatUiState.SetPassword -> SetPasswordScreen()
+                    is ChatUiState.AuthenticationComplete -> AuthenticationCompleteScreen()
+                    is ChatUiState.Error -> ErrorScreen((chatState as ChatUiState.Error).exception.message)
+                    is ChatUiState.Success -> SuccessScreen((chatState as ChatUiState.Success).message)
+                    is ChatUiState.WaitForPhoneNumberForUnRegisterUser -> UnregisterUserPhoneNumberScree()
+                    is ChatUiState.SendOTP -> SendOTPScreen(viewModel)
+                    ChatUiState.OTPValidationCompleted -> OTPValidationCompletedScreen(
+                        onStart = {
+                            viewModel.handleUserInput(input = "ঠিক আছে, শুরু করা যাক...")
+                        }
+                    )
+
+                    is ChatUiState.AskForClassNSection -> AskForClassNSectionScreen(
+                        selectedPosition = 1,
+                        selectedOption = selectedSection,
+                        selectedClass = selectedClass,
+                        onClassSelected = {newClass->
+                            selectedClass = newClass
+                            viewModel.updateClass(newClass = newClass)
+                        },
+                        onOptionSelected = {newOption->
+                            selectedSection = newOption
+                            viewModel.updateSection(newSection = newOption)
+                        }, submitInfo = {
+                            viewModel.handleUserInput("আমি ${selectedClass} শ্রেণীতে, ${selectedSection} বিভাগে অধ্যায়নরত আছি")
+                        }
+                    )
                 }
-            )
+            }
+
+            //Spacer(modifier = Modifier.weight(1f))
         }
 
+
         if (showTextField) {
-            Spacer(modifier = Modifier.weight(1f))
+            //Spacer(modifier = Modifier.weight(1f))
             Divider(color = Color(0xffF0F7FC), thickness = 1.dp)
             Row(
                 verticalAlignment = Alignment.CenterVertically
@@ -214,6 +251,16 @@ fun ChatBased() {
                             textInput = newValue
                         }
                     )
+                } else if (chatState is ChatUiState.AskForName) {
+                    CustomEditText(
+                        modifier = Modifier.weight(1f),
+                        value = textInput,
+                        placeholder = "এখানে লিখো ...",
+                        inputType = KeyBoardInputType.TEXT,
+                        onValueChange = { newValue ->
+                            textInput = newValue
+                        }
+                    )
                 }
 
                 CircularShape(
@@ -245,15 +292,176 @@ fun ChatBased() {
                             }
                         } else if (chatState is ChatUiState.SendOTP) {
                             viewModel.handleUserInput(textInput)
+                        } else if (chatState is ChatUiState.AskForName) {
+                            if (!viewModel.isValidName(textInput)) {
+                                Toast.makeText(context, "নামটি বৈধ নয়", Toast.LENGTH_SHORT)
+                                    .show()
+                            } else {
+                                viewModel.handleUserInput("আমার নাম: ${textInput}, এবং জেন্ডার:  ${selectedGender}")
+                            }
                         }
                     }
                 )
 
             }
         }
-
     }
 }
+
+
+//@Composable
+//fun ChatBased() {
+//    val viewModel = viewModel<ChatViewModel>()
+//    val chatState by viewModel.chatState.collectAsState()
+//    val messages by viewModel.messages.collectAsState()
+//    val showTextField by viewModel.showTextField.collectAsState()
+//    var textInput by remember { mutableStateOf("") }
+//
+//    val context = LocalContext.current
+//
+//    Column(
+//        modifier = Modifier
+//            .fillMaxSize()
+//            .padding(start = 15.dp, end = 15.dp, top = 10.dp)
+//    ) {
+//
+//        //MessagesList(messages = messages)
+//        Log.d("CHECK_SIZE", messages.size.toString())
+//        LazyColumn() {
+//            items(messages) { message ->
+//                ChatBubble(message.text, isUserMessage = message.isUserMessage)
+//            }
+//        }
+//
+//        when (chatState) {
+//            is ChatUiState.Loading -> LoadingScreen()
+//            is ChatUiState.Greeting -> GreetingScreen(
+//                yesBtn = {
+//                    viewModel.handleUserInput(
+//                        "জি, আমার একাউন্ট আছে!",
+//                        responseType = ResponseType.YES
+//                    )
+//                },
+//                noBtn = {
+//                    viewModel.handleUserInput(
+//                        "দুঃখিত, আমার কোনো একাউন্ট নেই!",
+//                        responseType = ResponseType.NO
+//                    )
+//                }
+//            )
+//
+//            is ChatUiState.AskForName -> AskForNameScreen()
+//            is ChatUiState.AskIfAccountExists -> AskIfAccountExistsScreen()
+//            is ChatUiState.WaitForPhoneNumber -> WaitForPhoneNumberScreen()
+//            is ChatUiState.AskForPassword -> AskForPasswordScreen()
+//            is ChatUiState.PasswordRetry -> PasswordRetryScreen()
+//            is ChatUiState.PasswordReset -> PasswordResetScreen()
+//            is ChatUiState.WaitForOTP -> WaitForOTPScreen()
+//            is ChatUiState.AccountCreation -> AccountCreationScreen()
+//            is ChatUiState.AskForGender -> AskForGenderScreen()
+//            is ChatUiState.AskForClass -> AskForClassScreen()
+//            is ChatUiState.AskForDivisionOrSection -> AskForDivisionOrSectionScreen()
+//            is ChatUiState.AskForBatch -> AskForBatchScreen()
+//            is ChatUiState.SetPassword -> SetPasswordScreen()
+//            is ChatUiState.AuthenticationComplete -> AuthenticationCompleteScreen()
+//            is ChatUiState.Error -> ErrorScreen((chatState as ChatUiState.Error).exception.message)
+//            is ChatUiState.Success -> SuccessScreen((chatState as ChatUiState.Success).message)
+//            is ChatUiState.WaitForPhoneNumberForUnRegisterUser -> UnregisterUserPhoneNumberScree()
+//            is ChatUiState.SendOTP -> SendOTPScreen(viewModel)
+//            ChatUiState.OTPValidationCompleted -> OTPValidationCompletedScreen(
+//                onStart = {
+//                    viewModel.handleUserInput(input = "ঠিক আছে, শুরু করা যাক...")
+//                }
+//            )
+//        }
+//
+//        //Spacer(modifier = Modifier.weight(1f))
+//
+//        if (showTextField) {
+//            //Spacer(modifier = Modifier.weight(1f))
+//            Divider(color = Color(0xffF0F7FC), thickness = 1.dp)
+//            Row(
+//                verticalAlignment = Alignment.CenterVertically
+//            ) {
+//                Box(
+//                    modifier = Modifier
+//                        .size(45.dp)
+//                        .background(Color(0xffE5F4F0), RoundedCornerShape(4.dp))
+//                        .padding(10.dp)
+//                ) {
+//                    Icon(
+//                        painterResource(id = R.drawable.feather_icon),
+//                        contentDescription = "",
+//                        tint = Color(0xff52B69A)
+//                    )
+//                }
+//
+//                Spacer(modifier = Modifier.padding(start = 5.dp))
+//
+//                if (chatState is ChatUiState.WaitForPhoneNumber ||
+//                    chatState is ChatUiState.WaitForPhoneNumberForUnRegisterUser ||
+//                    chatState is ChatUiState.SendOTP
+//                ) {
+//                    CustomEditText(
+//                        modifier = Modifier.weight(1f),
+//                        value = textInput,
+//                        placeholder = "এখানে লিখো ...",
+//                        inputType = KeyBoardInputType.NUMBER,
+//                        onValueChange = { newValue ->
+//                            textInput = newValue
+//                        }
+//                    )
+//                } else if (chatState is ChatUiState.AskForPassword) {
+//                    CustomEditText(
+//                        modifier = Modifier.weight(1f),
+//                        value = textInput,
+//                        placeholder = "এখানে লিখো ...",
+//                        inputType = KeyBoardInputType.PASSWORD,
+//                        onValueChange = { newValue ->
+//                            textInput = newValue
+//                        }
+//                    )
+//                }
+//
+//                CircularShape(
+//                    modifier = Modifier,
+//                    strokeColor = Color.Transparent,
+//                    centeredIcon = R.drawable.send_icon,
+//                    backgroundColor = Color(0xffE5F4F0),
+//                    iconTint = Color(0xff52B69A), whenClick = {
+//
+//                        if (chatState is ChatUiState.WaitForPhoneNumber) {
+//                            if (!isValidPhoneNumber(textInput.trim())) {
+//                                viewModel.handleUserInput(textInput)
+//                                textInput = ""
+//                            } else {
+//                                Toast.makeText(context, "ফোন নম্বর বৈধ নয়", Toast.LENGTH_SHORT)
+//                                    .show()
+//                            }
+//
+//                        } else if (chatState is ChatUiState.AskForPassword) {
+//                            viewModel.handleUserInput(textInput)
+//                        } else if (chatState is ChatUiState.WaitForPhoneNumberForUnRegisterUser) {
+//                            if (!isValidPhoneNumber(textInput.trim())) {
+//                                viewModel.handleUserInput(textInput)
+//                                textInput = ""
+//                                viewModel.sendOtp()
+//                            } else {
+//                                Toast.makeText(context, "ফোন নম্বর বৈধ নয়", Toast.LENGTH_SHORT)
+//                                    .show()
+//                            }
+//                        } else if (chatState is ChatUiState.SendOTP) {
+//                            viewModel.handleUserInput(textInput)
+//
+//                        }
+//                    }
+//                )
+//
+//            }
+//        }
+//
+//    }
+//}
 
 fun isValidPhoneNumber(number: String): Boolean {
     val pattern = "^01[3-9]\\d{8}$".toRegex()
@@ -271,21 +479,23 @@ fun MessagesList(messages: List<Message>) {
     val scrollState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
 
-    // Scroll to the bottom when the list of messages changes
-    LaunchedEffect(messages) {
+    // Track the size of the messages list
+    val listSize by remember { derivedStateOf { messages.size } }
+
+    // Scroll to the bottom when a new message is added
+    LaunchedEffect(listSize) {
         coroutineScope.launch {
-            scrollState.animateScrollToItem(messages.size)
+            scrollState.scrollToItem(index = max(0, listSize - 1))
         }
     }
 
-
-    LazyColumn(state = scrollState) {
+    LazyColumn(modifier = Modifier.fillMaxSize(), state = scrollState) {
         items(messages) { message ->
-            Log.d("CHECK_MESSAGE_STATE", "1. ${message.text} --- ${message.isUserMessage}")
             ChatBubble(message.text, isUserMessage = message.isUserMessage)
         }
     }
 }
+
 
 @Composable
 fun ChatBubble(text: String, isUserMessage: Boolean) {

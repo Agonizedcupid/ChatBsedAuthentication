@@ -55,10 +55,12 @@ fun LoadingScreen() {
 fun PreviewLoadingScreen() {
     BoxWithConstraints {
         ChatBasedAuthenticationSystemTheme {
-            Column (modifier = Modifier
-                .fillMaxSize()
-                .background(Color.White)
-                .padding(15.dp)){
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.White)
+                    .padding(15.dp)
+            ) {
                 AskIfAccountExistsScreen()
             }
 
@@ -113,15 +115,43 @@ fun AccountCreationScreen() {
 }
 
 @Composable
-fun AskForNameScreen() {
-//    Column {
-//        Text("What's your name?")
-//        var name by remember { mutableStateOf("") }
-//        TextField(value = name, onValueChange = { name = it })
-//        Button(onClick = { onNameEntered(name) }) {
-//            Text("Submit Name")
-//        }
-//    }
+fun AskForNameScreen(
+    textInput: String, selectedGender: String,
+    onGenderSelected: (String) -> Unit
+) {
+    BubbleWithIcon(isUserMessage = false) {
+        ASkForNameComponent(textInput, selectedGender, onGenderSelected)
+    }
+}
+
+@Composable
+fun AskForClassNSectionScreen(
+    selectedPosition: Int, selectedOption: String, onOptionSelected: (String) -> Unit,
+    selectedClass: String, onClassSelected: (String) -> Unit, submitInfo: ()-> Unit
+) {
+    BubbleWithIcon(isUserMessage = false) {
+        ClassSectionSelectionComponent(
+            selectedPosition = selectedPosition,
+            selectedOption = selectedOption,
+            onOptionSelected = onOptionSelected,
+            selectedClass = selectedClass,
+            onClassSelected = onClassSelected,
+            submitInfo = submitInfo
+        )
+    }
+}
+
+@Preview
+@Composable
+fun PreviewAskForName() {
+    BoxWithConstraints {
+        ChatBasedAuthenticationSystemTheme {
+            Column(modifier = Modifier.background(Color.White)) {
+                //ClassSectionSelectionComponent(1)
+            }
+
+        }
+    }
 }
 
 @Composable
@@ -196,7 +226,7 @@ fun AuthenticationCompleteScreen() {
 @Composable
 fun GreetingScreen(yesBtn: () -> Unit, noBtn: () -> Unit) {
     BubbleWithIcon(isUserMessage = false) {
-        GreetingComponent(yesBtn = { yesBtn() }, noBtn = {noBtn()})
+        GreetingComponent(yesBtn = { yesBtn() }, noBtn = { noBtn() })
     }
 
 }
@@ -216,9 +246,9 @@ fun SendOTPScreen(viewModel: ChatViewModel) {
 }
 
 @Composable
-fun OTPValidationCompletedScreen(onStart: ()-> Unit) {
+fun OTPValidationCompletedScreen(onStart: () -> Unit) {
     BubbleWithIcon(isUserMessage = false) {
-        OTPValidationCompletedComponent(onStart = {onStart()})
+        OTPValidationCompletedComponent(onStart = { onStart() })
     }
 }
 
@@ -229,7 +259,6 @@ fun AskIfAccountExistsScreen() {
 //        AskIfAccountExistsScreenComponent()
 //    }
 }
-
 
 
 @Composable

@@ -1,25 +1,36 @@
 package com.aariyan.chatbasedauthenticationsystem
 
-import android.text.InputType
-import android.widget.Space
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.ElevatedButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -33,6 +44,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.aariyan.chatbasedauthenticationsystem.ui.theme.ChatBasedAuthenticationSystemTheme
+import java.util.Calendar
 
 @Composable
 fun GreetingComponent(yesBtn: () -> Unit, noBtn: () -> Unit) {
@@ -211,13 +223,13 @@ fun OTPValidationCompletedComponent(onStart: () -> Unit) {
     }
 }
 
-@Preview
-@Composable
-fun PreviewSendOTPScreenComponent() {
-    ChatBasedAuthenticationSystemTheme {
-        OTPValidationCompletedComponent(onStart = {})
-    }
-}
+//@Preview
+//@Composable
+//fun PreviewSendOTPScreenComponent() {
+//    ChatBasedAuthenticationSystemTheme {
+//        OTPValidationCompletedComponent(onStart = {})
+//    }
+//}
 
 @Composable
 fun AskForPasswordScreenComponent() {
@@ -235,21 +247,479 @@ fun AskForPasswordScreenComponent() {
 }
 
 
+//@Preview
+//@Composable
+//fun PreviewGreetingComponent() {
+//    BoxWithConstraints {
+//        ChatBasedAuthenticationSystemTheme {
+//            Column(
+//                modifier = Modifier
+//                    .fillMaxSize()
+//                    .background(Color.White)
+//            ) {
+//                AskIfAccountExistsScreenComponent()
+//            }
+//        }
+//    }
+//}
+
+@Composable
+fun AuthInfoPreviewInLastSteps() {
+    Column(
+        modifier = Modifier
+            .padding(15.dp)
+            .fillMaxWidth()
+            .background(Color(0xffEEF8F5), RoundedCornerShape(8.dp)),
+        //.padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+
+        Text(
+            text = "Mehedi, তোমার প্রদত্ত তথ্যগুলো",
+            style = TextStyle(color = Color(0xff71828A), fontSize = 16.sp)
+        )
+
+        Text(
+            text = "সঠিক কিনা আর একবার দেখে নাও ",
+            style = TextStyle(color = Color(0xff52B69A), fontSize = 16.sp)
+        )
+
+        Spacer(modifier = Modifier.padding(top = 25.dp))
+
+
+        Row(modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 15.dp, end = 15.dp)) {
+            Text(text = "নামঃ ")
+            Text(text = "Mehedi Hassan", color = Color(0xff52B69A))
+        }
+
+        Row(modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 15.dp, end = 15.dp)) {
+            Text(text = "জেন্ডারঃ ")
+            Text(text = "ছেলে", color = Color(0xff52B69A))
+        }
+
+        Row(modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 15.dp, end = 15.dp)) {
+            Text(text = "শ্রেণীঃ ")
+            Text(text = "এইচএসসি", color = Color(0xff52B69A))
+        }
+
+        Row(modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 15.dp, end = 15.dp)) {
+            Text(text = "বিভাগঃ ")
+            Text(text = "বিজ্ঞান", color = Color(0xff52B69A))
+        }
+
+        Row(modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 15.dp, end = 15.dp)) {
+            Text(text = "ব্যাচঃ ")
+            Text(text = "এইচএসসি ২০২৫", color = Color(0xff52B69A))
+        }
+
+
+        ElevatedButton(modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 15.dp, end = 15.dp, top = 15.dp), onClick = { }) {
+            Text(
+                text = "সব ঠিক আছে",
+                style = TextStyle(
+                    color = Color(0xff52B69A),
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            )
+        }
+        ElevatedButton(modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 15.dp, end = 15.dp, bottom = 15.dp), onClick = { }) {
+            Text(
+                text = "পরিবর্তন করতে চাই",
+                style = TextStyle(
+                    color = Color(0xff52B69A),
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            )
+        }
+    }
+}
+
+@Composable
+fun RoundedDivider(modifier: Modifier = Modifier, color: Color = Color(0xffCCEAE1)) {
+    Box(
+        modifier = modifier
+            .height(4.dp)
+            .background(color, RoundedCornerShape(50))
+    )
+}
+
+
+@Composable
+fun ASkForNameComponent(
+    textInput: String,
+    selectedGender: String,
+    onGenderSelected: (String) -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .padding(top = 15.dp)
+            .fillMaxWidth()
+            .background(Color(0xffEEF8F5), RoundedCornerShape(8.dp)),
+    ) {
+        NameGenderComponent(0, textInput = textInput, selectedGender, onGenderSelected)
+        //ClassSectionSelectionComponent(selectedPosition = 1)
+        //BatchSelectionComponent(2)
+        //SetPasswordComponent(selectedPosition = 3)
+        //ConfirmPasswordComponent(selectedPosition = 3)
+    }
+}
+
+@Composable
+fun SetPasswordComponent(selectedPosition: Int) {
+    Column {
+        Text(
+            text = "ধন্যবাদ, Mehedi তোমার পাসওয়ার্ড সেট করো",
+            style = TextStyle(color = Color(0xff71828A), fontSize = 16.sp)
+        )
+
+        Spacer(modifier = Modifier.padding(top = 16.dp))
+        HandleDividerSelection(selectedPosition = selectedPosition)
+        Text(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+                .background(Color.White, RoundedCornerShape(8.dp))
+                .padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 12.dp),
+            text = "ABCDfgdf"
+        )
+
+    }
+}
+
+@Composable
+fun ConfirmPasswordComponent(selectedPosition: Int) {
+    Column {
+        Text(
+            text = "ধন্যবাদ, Mehedi তোমার পাসওয়ার্ড টি পুনরায় দাও",
+            style = TextStyle(color = Color(0xff71828A), fontSize = 16.sp)
+        )
+
+        Spacer(modifier = Modifier.padding(top = 16.dp))
+        HandleDividerSelection(selectedPosition = selectedPosition)
+        Text(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+                .background(Color.White, RoundedCornerShape(8.dp))
+                .padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 12.dp),
+            text = "ABCDfgdf"
+        )
+
+        Row(
+            modifier = Modifier.padding(start = 15.dp, end = 15.dp, bottom = 15.dp)
+        ) {
+            Icon(Icons.Default.Info, tint = Color.Red, contentDescription = "")
+            Spacer(modifier = Modifier.padding(start = 10.dp))
+            Text(text = "পাসওয়ার্ডটি কোথাও ভুল হচ্ছে!", color = Color.Red)
+        }
+
+        ElevatedButton(modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 15.dp, end = 15.dp, bottom = 15.dp), onClick = {
+        }) {
+            Text(
+                text = "নতুন করে পাসওয়ার্ড সেট করো",
+                style = TextStyle(
+                    color = Color(0xff52B69A),
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            )
+        }
+    }
+}
+
+@Composable
+fun BatchSelectionComponent(selectedPosition: Int) {
+    val currentYear = Calendar.getInstance().get(Calendar.YEAR)
+    val items =
+        (currentYear..currentYear + 3).map { "SSC ${it.toString()}" } // List of years as strings
+    var selectedItem by remember { mutableStateOf<String?>("SSC 2026") }
+
+
+    Column {
+        Text(
+            text = "ধন্যবাদ, Mehedi তোমার ব্যাচ সিলেক্ট করো",
+            style = TextStyle(color = Color(0xff71828A), fontSize = 16.sp)
+        )
+
+        Spacer(modifier = Modifier.padding(top = 16.dp))
+        HandleDividerSelection(selectedPosition = selectedPosition)
+
+        Spacer(modifier = Modifier.padding(top = 8.dp))
+        items.forEach { item ->
+            SelectableItem(
+                text = item,
+                isSelected = selectedItem == item,
+                onSelect = { selectedItem = it },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 15.dp, end = 15.dp)
+            )
+        }
+
+
+        ElevatedButton(modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 15.dp, end = 15.dp, bottom = 15.dp), onClick = {
+        }) {
+            Text(
+                text = "Submit",
+                style = TextStyle(
+                    color = Color(0xff52B69A),
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            )
+        }
+    }
+}
+
+@Composable
+fun ClassSectionSelectionComponent(selectedPosition: Int, selectedOption: String, onOptionSelected: (String) -> Unit,
+                                   selectedClass: String, onClassSelected: (String) -> Unit, submitInfo: ()-> Unit) {
+    val items = listOf("৬ষ্ট", "৭ম", "৮ম", "এসএসসি", "এইচএসসি")
+    //var selectedItem by remember { mutableStateOf<String?>("এইচএসসি") }
+
+    Column {
+        Text(
+            text = "অভিনন্দন Abdullah, নিচে ক্লাস সিলেক্ট করো",
+            style = TextStyle(color = Color(0xff71828A), fontSize = 16.sp)
+        )
+
+        Spacer(modifier = Modifier.padding(top = 16.dp))
+        HandleDividerSelection(selectedPosition = selectedPosition)
+
+        Spacer(modifier = Modifier.padding(top = 8.dp))
+        items.chunked(3).forEach { rowItems ->
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                    //.padding(horizontal = 8.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                rowItems.forEach { item ->
+                    SelectableItem(
+                        text = item,
+                        isSelected = selectedClass == item,
+                        onSelect = { onClassSelected(item) },
+                        modifier = Modifier.weight(1f) // Equal weight for each item
+                    )
+                }
+            }
+        }
+
+
+        // Conditionally display the button
+        if (selectedClass == "এসএসসি" || selectedClass == "এইচএসসি") {
+
+            Text(
+                modifier = Modifier.padding(top = 15.dp),
+                text = "তোমার বিভাগ নির্বাচন করো", color = Color(0xff71828A)
+            )
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                SectionSelectionComponent(selectedOption, onOptionSelected)
+            }
+
+        }
+
+        ElevatedButton(modifier = Modifier
+            .fillMaxWidth(), onClick = {
+                submitInfo()
+        }) {
+            Text(
+                text = "সাবমিট",
+                style = TextStyle(
+                    color = Color(0xff52B69A),
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            )
+        }
+    }
+}
+
+@Composable
+@Preview
+fun PreviewClassSection() {
+    ChatBasedAuthenticationSystemTheme {
+        //ClassSectionSelectionComponent(1)
+    }
+}
+
+@Composable
+fun SelectableItem(
+    text: String,
+    isSelected: Boolean,
+    onSelect: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val backgroundColor = if (isSelected) Color(0xFFCCEAE1) else Color.White
+    val textColor = if (isSelected) Color(0xff52B69A) else Color.Black
+    val borderColor = if (isSelected) Color(0xff52B69A) else Color.White
+
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = modifier
+            .padding(4.dp)
+            .background(backgroundColor, RoundedCornerShape(8.dp))
+            .clickable { onSelect(text) }
+            .border(1.dp, borderColor, RoundedCornerShape(8.dp))
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+    ) {
+        Text(text, color = textColor)
+    }
+}
+
+@Composable
+fun NameGenderComponent(
+    selectedPosition: Int,
+    textInput: String,
+    selectedGender: String,
+    onGenderSelected: (String) -> Unit
+) {
+    Column {
+        Text(
+            text = "তোমার নাম লিখো - ইংরেজিতে",
+            style = TextStyle(color = Color(0xff71828A), fontSize = 16.sp)
+        )
+
+        Spacer(modifier = Modifier.padding(top = 16.dp))
+        HandleDividerSelection(selectedPosition = selectedPosition)
+        Text(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 16.dp)
+                .background(Color.White, RoundedCornerShape(8.dp))
+                .padding(start = 16.dp, top = 12.dp, bottom = 12.dp),
+            text = textInput
+        )
+
+        Row(
+            //modifier = Modifier.padding(start = 15.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(text = "জেন্ডার:")
+            RadioBtnComponent(selectedOption = selectedGender, onOptionSelected = onGenderSelected)
+
+        }
+
+        ElevatedButton(modifier = Modifier
+            .fillMaxWidth(),
+            onClick = {
+            }) {
+            Text(
+                text = "সাবমিট",
+                style = TextStyle(
+                    color = Color(0xff52B69A),
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            )
+        }
+    }
+
+}
+
+@Composable
+fun SectionSelectionComponent(selectedOption: String, onOptionSelected: (String) -> Unit) {
+    //var selectedOption by remember { mutableStateOf("বিজ্ঞান") }
+    val options = listOf("বিজ্ঞান", "ব্যবসায় শিক্ষা", "মানবিক")
+
+    LazyRow {
+        items(options) { option ->
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                RadioButton(
+                    selected = option == selectedOption,
+                    onClick = { onOptionSelected(option) },
+                    colors = RadioButtonDefaults.colors(
+                        selectedColor = Color(0xff52B69A),
+                        unselectedColor = Color.White
+                    )
+                )
+                Text(text = option)
+            }
+        }
+    }
+}
+
+
+
+@Composable
+fun RadioBtnComponent(selectedOption: String, onOptionSelected: (String) -> Unit) {
+    val options = listOf("ছেলে", "মেয়ে")
+
+    options.forEach { option ->
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(8.dp)
+        ) {
+            RadioButton(
+                selected = option == selectedOption,
+                onClick = { onOptionSelected(option) },
+                colors = RadioButtonDefaults.colors(
+                    selectedColor = Color(0xff52B69A),
+                    unselectedColor = Color.Gray
+                )
+                // Optionally, add colors or other styling
+            )
+            Text(text = option, modifier = Modifier.padding(start = 8.dp))
+        }
+    }
+}
+
+
+@Composable
+fun HandleDividerSelection(selectedPosition: Int) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 15.dp, end = 15.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        for (i in 0 until 4) {
+            RoundedDivider(
+                color = if (i == selectedPosition) Color(0xff52B69A) else Color(0xffCCEAE1),
+                modifier = Modifier.weight(1f)
+            )
+
+            if (i < 3) { // Avoid adding a spacer after the last divider
+                Spacer(modifier = Modifier.width(16.dp))
+            }
+        }
+    }
+}
+
 @Preview
 @Composable
 fun PreviewGreetingComponent() {
     BoxWithConstraints {
         ChatBasedAuthenticationSystemTheme {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.White)
-            ) {
-                AskIfAccountExistsScreenComponent()
-            }
+            //ASkForNameComponent("")
         }
     }
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////
 
 enum class KeyBoardInputType {
     TEXT, PHONE, PASSWORD, EMAIL, NUMBER
@@ -295,10 +765,10 @@ fun CustomEditText(
     )
 }
 
-@Preview
-@Composable
-fun PreviewCustomEditText() {
-    ChatBasedAuthenticationSystemTheme {
-        CustomEditText(value = "dfgsdfg", onValueChange = {})
-    }
-}
+//@Preview
+//@Composable
+//fun PreviewCustomEditText() {
+//    ChatBasedAuthenticationSystemTheme {
+//        CustomEditText(value = "dfgsdfg", onValueChange = {})
+//    }
+//}

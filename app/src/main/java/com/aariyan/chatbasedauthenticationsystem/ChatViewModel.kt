@@ -13,6 +13,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -40,6 +41,25 @@ class ChatViewModel : ViewModel() {
     private val _otpTimerValue = MutableStateFlow(20) // 120 seconds for 2 minutes
     val otpTimerValue: StateFlow<Int> = _otpTimerValue
 
+    private val _selectedGender = MutableStateFlow("")
+    val selectedGender = _selectedGender.asStateFlow()
+
+    private val _selectedClass = MutableStateFlow("")
+    private val _selectedSection = MutableStateFlow("বিজ্ঞান")
+
+    fun updateGender(newGender: String) {
+        _selectedGender.value = newGender
+        // Additional logic can be added here if needed
+    }
+
+    fun updateClass (newClass: String) {
+        _selectedClass.value = newClass
+    }
+
+    fun updateSection(newSection: String) {
+        _selectedSection.value = newSection
+    }
+
 
     fun sendOtp() {
         startOtpTimer()
@@ -62,13 +82,29 @@ class ChatViewModel : ViewModel() {
         startOtpTimer() // Start the timer again
     }
 
+    fun isValidName(name: String): Boolean {
+        // Check if the name is not empty
+        if (name.isBlank()) return false
+
+        // Check if the name contains only letters and spaces
+        if (!name.matches(Regex("^[A-Za-z\\s]+\$"))) return false
+
+        // Check for any specific length requirements (optional)
+        // Example: Name should be at least 2 characters long
+        if (name.length < 2) return false
+
+        return true
+    }
+
+
 
     val showTextField: StateFlow<Boolean> = chatState.map { state ->
         when (state) {
             is ChatUiState.WaitForPhoneNumber,
             is ChatUiState.AskForPassword,
             is ChatUiState.WaitForPhoneNumberForUnRegisterUser,
-            is ChatUiState.SendOTP
+            is ChatUiState.SendOTP,
+            is ChatUiState.AskForName
             -> true
 
             else -> false
@@ -176,7 +212,7 @@ class ChatViewModel : ViewModel() {
             }
 
             is ChatUiState.AskForName -> {
-                processNameInput(input)
+                processNameInput(input, input)
             }
 
             is ChatUiState.PasswordRetry -> {
@@ -293,9 +329,19 @@ class ChatViewModel : ViewModel() {
             }
 
             is ChatUiState.OTPValidationCompleted -> {
-                val text = "ধন্যবাদ, নিবন্ধনের প্রথম ধাপ সম্পন্ন হয়েছে, দ্বিতীয় ধাপে তোমার প্রোফাইল আপডেট করতে কিছু তথ্য প্রয়োজন"
+                val text =
+                    "ধন্যবাদ, নিবন্ধনের প্রথম ধাপ সম্পন্ন হয়েছে, দ্বিতীয় ধাপে তোমার প্রোফাইল আপডেট করতে কিছু তথ্য প্রয়োজন"
                 appendSystemMessage(text.toString(), isUserMessage = false)
                 _messages.value += Message(input, true)
+                // Updated the State -> Now Go to Main Screen to handle the Ask for Name screen
+                _chatState.value = ChatUiState.AskForName("")
+            }
+
+            is ChatUiState.AskForClassNSection -> {
+                //appendSystemMessage(input, isUserMessage = false)
+                _messages.value += Message(input, true)
+                // Updated the State -> Now Go to Main Screen to handle the Ask for Name screen
+                //_chatState.value = ChatUiState.AskForName("")
             }
         }
     }
@@ -424,18 +470,27 @@ class ChatViewModel : ViewModel() {
         }
     }
 
-    private fun processNameInput(name: String) {
-        if (validateName(name)) {
-            // If the name is valid, proceed with the next step of account creation
-            // For example, asking for gender
-            _chatState.value = ChatUiState.AskForGender
-            appendSystemMessage("Ask for Gender", isUserMessage = false)
-        } else {
-            // If the name is invalid, prompt the user to enter a valid name again
-            _chatState.value =
-                ChatUiState.Error(Exception("Invalid name. Please enter a valid name."))
-            appendSystemMessage("Invalid name. Please enter a valid name.", isUserMessage = false)
-        }
+    private fun processNameInput(name: String, input: String) {
+
+
+        appendSystemMessage("তোমার নাম এবং জেন্ডার সম্পর্কে জানতে চাচ্ছিলাম", isUserMessage = false)
+        _messages.value += Message(input, true)
+        appendSystemMessage("ধন্যবাদ, তোমার নাম এবং জেন্ডার জানানোর জন্য", isUserMessage = false)
+
+        _chatState.value = ChatUiState.AskForClassNSection("")
+
+//        if (isValidName(name)) {
+//            // If the name is valid, proceed with the next step of account creation
+//            // For example, asking for gender
+//            //_chatState.value = ChatUiState.AskForGender
+//            _messages.value += Message(input, true)
+//            appendSystemMessage("ধন্যবাদ, তোমার নাম এবং জেন্ডার জানানোর জন্য", isUserMessage = false)
+//        } else {
+//            // If the name is invalid, prompt the user to enter a valid name again
+////            _chatState.value =
+////                ChatUiState.Error(Exception("Invalid name. Please enter a valid name."))
+//            appendSystemMessage("Invalid name. Please enter a valid name.", isUserMessage = false)
+//        }
     }
 
     // Placeholder for name validation
@@ -487,8 +542,9 @@ sealed interface ChatUiState {
     object WaitForOTP : ChatUiState
     object SendOTP : ChatUiState
     object AccountCreation : ChatUiState
-    object OTPValidationCompleted: ChatUiState
+    object OTPValidationCompleted : ChatUiState
     data class AskForName(val message: String) : ChatUiState
+    data class AskForClassNSection(val message: String) : ChatUiState
     object AskForGender : ChatUiState
     object AskForClass : ChatUiState
     object AskForDivisionOrSection : ChatUiState
