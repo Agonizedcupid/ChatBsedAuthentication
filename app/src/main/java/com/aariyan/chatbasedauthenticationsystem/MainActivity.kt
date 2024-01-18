@@ -122,6 +122,9 @@ fun ChatBased() {
     var selectedGender by remember { mutableStateOf("ছেলে") }
     var selectedClass by remember { mutableStateOf("") }
     var selectedSection by remember { mutableStateOf("") }
+    var selectedBatchYear by remember {
+        mutableStateOf("")
+    }
 
     val context = LocalContext.current
 
@@ -199,6 +202,27 @@ fun ChatBased() {
                         }, submitInfo = {
                             viewModel.handleUserInput("আমি ${selectedClass} শ্রেণীতে, ${selectedSection} বিভাগে অধ্যায়নরত আছি")
                         }
+                    )
+
+                    is ChatUiState.AskForBatchSection -> AskForBatchSelectionScreen(
+                        selectedPosition = 2,
+                        selectedBatchYear = selectedBatchYear,
+                        onBatchYearSelected = {newYear->
+                            selectedBatchYear = newYear
+                            viewModel.updateBatchYear(newYear = newYear)
+                        },
+                        onSubmitClick = {
+                            viewModel.handleUserInput("আমি ${selectedBatchYear} ব্যাচের একজন ছাত্র/ছাত্রী")
+                        }
+                    )
+
+                    is ChatUiState.AskForRegistrationPassword-> AskForRegPasswordScreen(
+                        selectedPosition = 3,
+                        password = textInput
+                    )
+                    is ChatUiState.AskForConfirmRegistrationPassword-> AskForConfirmRegPasswordScreen(
+                        selectedPosition = 3,
+                        password = textInput
                     )
                 }
             }
@@ -299,6 +323,8 @@ fun ChatBased() {
                             } else {
                                 viewModel.handleUserInput("আমার নাম: ${textInput}, এবং জেন্ডার:  ${selectedGender}")
                             }
+                        } else {
+                            viewModel.handleUserInput("")
                         }
                     }
                 )

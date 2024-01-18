@@ -19,9 +19,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
@@ -34,6 +36,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -287,37 +290,47 @@ fun AuthInfoPreviewInLastSteps() {
         Spacer(modifier = Modifier.padding(top = 25.dp))
 
 
-        Row(modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 15.dp, end = 15.dp)) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 15.dp, end = 15.dp)
+        ) {
             Text(text = "নামঃ ")
             Text(text = "Mehedi Hassan", color = Color(0xff52B69A))
         }
 
-        Row(modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 15.dp, end = 15.dp)) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 15.dp, end = 15.dp)
+        ) {
             Text(text = "জেন্ডারঃ ")
             Text(text = "ছেলে", color = Color(0xff52B69A))
         }
 
-        Row(modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 15.dp, end = 15.dp)) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 15.dp, end = 15.dp)
+        ) {
             Text(text = "শ্রেণীঃ ")
             Text(text = "এইচএসসি", color = Color(0xff52B69A))
         }
 
-        Row(modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 15.dp, end = 15.dp)) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 15.dp, end = 15.dp)
+        ) {
             Text(text = "বিভাগঃ ")
             Text(text = "বিজ্ঞান", color = Color(0xff52B69A))
         }
 
-        Row(modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 15.dp, end = 15.dp)) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 15.dp, end = 15.dp)
+        ) {
             Text(text = "ব্যাচঃ ")
             Text(text = "এইচএসসি ২০২৫", color = Color(0xff52B69A))
         }
@@ -381,7 +394,7 @@ fun ASkForNameComponent(
 }
 
 @Composable
-fun SetPasswordComponent(selectedPosition: Int) {
+fun SetPasswordComponent(selectedPosition: Int, password: String) {
     Column {
         Text(
             text = "ধন্যবাদ, Mehedi তোমার পাসওয়ার্ড সেট করো",
@@ -390,20 +403,12 @@ fun SetPasswordComponent(selectedPosition: Int) {
 
         Spacer(modifier = Modifier.padding(top = 16.dp))
         HandleDividerSelection(selectedPosition = selectedPosition)
-        Text(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-                .background(Color.White, RoundedCornerShape(8.dp))
-                .padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 12.dp),
-            text = "ABCDfgdf"
-        )
-
+        PasswordText(password = password)
     }
 }
 
 @Composable
-fun ConfirmPasswordComponent(selectedPosition: Int) {
+fun ConfirmPasswordComponent(selectedPosition: Int, password: String) {
     Column {
         Text(
             text = "ধন্যবাদ, Mehedi তোমার পাসওয়ার্ড টি পুনরায় দাও",
@@ -412,17 +417,10 @@ fun ConfirmPasswordComponent(selectedPosition: Int) {
 
         Spacer(modifier = Modifier.padding(top = 16.dp))
         HandleDividerSelection(selectedPosition = selectedPosition)
-        Text(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-                .background(Color.White, RoundedCornerShape(8.dp))
-                .padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 12.dp),
-            text = "ABCDfgdf"
-        )
+        PasswordText(password = password)
 
         Row(
-            modifier = Modifier.padding(start = 15.dp, end = 15.dp, bottom = 15.dp)
+            modifier = Modifier.padding(bottom = 15.dp)
         ) {
             Icon(Icons.Default.Info, tint = Color.Red, contentDescription = "")
             Spacer(modifier = Modifier.padding(start = 10.dp))
@@ -446,11 +444,53 @@ fun ConfirmPasswordComponent(selectedPosition: Int) {
 }
 
 @Composable
-fun BatchSelectionComponent(selectedPosition: Int) {
+fun PasswordText(password: String) {
+    var passwordVisible by remember { mutableStateOf(false) }
+    val displayText = if (passwordVisible) password else "*".repeat(password.length)
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 16.dp)
+            .background(Color.White, RoundedCornerShape(8.dp))
+            .padding(start = 16.dp, end = 16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            modifier = Modifier
+                .weight(1f)
+                .padding(top = 12.dp, bottom = 12.dp),
+            text = displayText
+        )
+
+        IconButton(onClick = { passwordVisible = !passwordVisible }) {
+            Icon(
+                painterResource(id = if (passwordVisible) R.drawable.password_invisible else R.drawable.password_visible ),
+                contentDescription = if (passwordVisible) "Hide password" else "Show password"
+            )
+        }
+    }
+}
+
+
+@Preview
+@Composable
+fun PreviewSetPassword() {
+    ChatBasedAuthenticationSystemTheme {
+        //SetPasswordComponent(selectedPosition = 4, "dfgsdfg")
+        ConfirmPasswordComponent(selectedPosition = 4, "fgsdfgsdfgsdfgsdf")
+    }
+}
+
+@Composable
+fun BatchSelectionComponent(
+    selectedPosition: Int,
+    selectedBatchYear: String,
+    onBatchYearSelected: (String) -> Unit, onSubmitClick: ()-> Unit
+) {
     val currentYear = Calendar.getInstance().get(Calendar.YEAR)
-    val items =
-        (currentYear..currentYear + 3).map { "SSC ${it.toString()}" } // List of years as strings
-    var selectedItem by remember { mutableStateOf<String?>("SSC 2026") }
+    val items = (currentYear..currentYear + 3).map { "SSC ${it.toString()}" } // List of years as strings
+    //var selectedItem by remember { mutableStateOf<String?>("SSC 2026") }
 
 
     Column {
@@ -466,11 +506,8 @@ fun BatchSelectionComponent(selectedPosition: Int) {
         items.forEach { item ->
             SelectableItem(
                 text = item,
-                isSelected = selectedItem == item,
-                onSelect = { selectedItem = it },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 15.dp, end = 15.dp)
+                isSelected = selectedBatchYear == item,
+                onSelect = { onBatchYearSelected(item) },
             )
         }
 
@@ -478,6 +515,7 @@ fun BatchSelectionComponent(selectedPosition: Int) {
         ElevatedButton(modifier = Modifier
             .fillMaxWidth()
             .padding(start = 15.dp, end = 15.dp, bottom = 15.dp), onClick = {
+                onSubmitClick()
         }) {
             Text(
                 text = "Submit",
@@ -492,8 +530,10 @@ fun BatchSelectionComponent(selectedPosition: Int) {
 }
 
 @Composable
-fun ClassSectionSelectionComponent(selectedPosition: Int, selectedOption: String, onOptionSelected: (String) -> Unit,
-                                   selectedClass: String, onClassSelected: (String) -> Unit, submitInfo: ()-> Unit) {
+fun ClassSectionSelectionComponent(
+    selectedPosition: Int, selectedOption: String, onOptionSelected: (String) -> Unit,
+    selectedClass: String, onClassSelected: (String) -> Unit, submitInfo: () -> Unit
+) {
     val items = listOf("৬ষ্ট", "৭ম", "৮ম", "এসএসসি", "এইচএসসি")
     //var selectedItem by remember { mutableStateOf<String?>("এইচএসসি") }
 
@@ -511,7 +551,7 @@ fun ClassSectionSelectionComponent(selectedPosition: Int, selectedOption: String
             Row(
                 modifier = Modifier
                     .fillMaxWidth(),
-                    //.padding(horizontal = 8.dp),
+                //.padding(horizontal = 8.dp),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 rowItems.forEach { item ->
@@ -544,7 +584,7 @@ fun ClassSectionSelectionComponent(selectedPosition: Int, selectedOption: String
 
         ElevatedButton(modifier = Modifier
             .fillMaxWidth(), onClick = {
-                submitInfo()
+            submitInfo()
         }) {
             Text(
                 text = "সাবমিট",
@@ -661,7 +701,6 @@ fun SectionSelectionComponent(selectedOption: String, onOptionSelected: (String)
         }
     }
 }
-
 
 
 @Composable

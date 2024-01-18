@@ -141,6 +141,53 @@ fun AskForClassNSectionScreen(
     }
 }
 
+@Composable
+fun AskForBatchSelectionScreen(
+    selectedPosition: Int,
+    selectedBatchYear: String,
+    onBatchYearSelected: (String) ->
+    Unit, onSubmitClick: ()-> Unit
+) {
+    BubbleWithIcon(isUserMessage = false) {
+        BatchSelectionComponent(
+            selectedPosition = selectedPosition,
+            selectedBatchYear = selectedBatchYear,
+            onBatchYearSelected = onBatchYearSelected,
+            onSubmitClick = onSubmitClick
+        )
+    }
+}
+
+@Composable
+fun AskForRegPasswordScreen(
+    selectedPosition: Int,
+    password: String,
+    //onSubmitClick: ()-> Unit
+) {
+    BubbleWithIcon(isUserMessage = false) {
+        SetPasswordComponent(
+            selectedPosition = selectedPosition,
+            password = password,
+            //onSubmitClick = onSubmitClick
+        )
+    }
+}
+
+@Composable
+fun AskForConfirmRegPasswordScreen(
+    selectedPosition: Int,
+    password: String,
+    //onSubmitClick: ()-> Unit
+) {
+    BubbleWithIcon(isUserMessage = false) {
+        ConfirmPasswordComponent(
+            selectedPosition = selectedPosition,
+            password = password,
+            //onSubmitClick = onSubmitClick
+        )
+    }
+}
+
 @Preview
 @Composable
 fun PreviewAskForName() {

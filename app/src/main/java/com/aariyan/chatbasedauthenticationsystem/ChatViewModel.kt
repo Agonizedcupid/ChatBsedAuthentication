@@ -47,12 +47,18 @@ class ChatViewModel : ViewModel() {
     private val _selectedClass = MutableStateFlow("")
     private val _selectedSection = MutableStateFlow("বিজ্ঞান")
 
+    private val _selectedBatchYear = MutableStateFlow("")
+
+    fun updateBatchYear(newYear: String) {
+        _selectedBatchYear.value = newYear
+    }
+
     fun updateGender(newGender: String) {
         _selectedGender.value = newGender
         // Additional logic can be added here if needed
     }
 
-    fun updateClass (newClass: String) {
+    fun updateClass(newClass: String) {
         _selectedClass.value = newClass
     }
 
@@ -97,14 +103,15 @@ class ChatViewModel : ViewModel() {
     }
 
 
-
     val showTextField: StateFlow<Boolean> = chatState.map { state ->
         when (state) {
             is ChatUiState.WaitForPhoneNumber,
             is ChatUiState.AskForPassword,
             is ChatUiState.WaitForPhoneNumberForUnRegisterUser,
             is ChatUiState.SendOTP,
-            is ChatUiState.AskForName
+            is ChatUiState.AskForName,
+            is ChatUiState.AskForRegistrationPassword,
+            is ChatUiState.AskForConfirmRegistrationPassword
             -> true
 
             else -> false
@@ -339,9 +346,29 @@ class ChatViewModel : ViewModel() {
 
             is ChatUiState.AskForClassNSection -> {
                 //appendSystemMessage(input, isUserMessage = false)
+                appendSystemMessage("তোমার ক্লাস সিলেক্ট করো", isUserMessage = false)
                 _messages.value += Message(input, true)
+                _chatState.value = ChatUiState.AskForBatchSection("")
                 // Updated the State -> Now Go to Main Screen to handle the Ask for Name screen
                 //_chatState.value = ChatUiState.AskForName("")
+            }
+
+            is ChatUiState.AskForBatchSection -> {
+                appendSystemMessage("তোমার ব্যাচ সিলেক্ট করো", isUserMessage = false)
+                _messages.value += Message(input, true)
+                _chatState.value = ChatUiState.AskForRegistrationPassword("")
+            }
+
+            is ChatUiState.AskForRegistrationPassword -> {
+                appendSystemMessage("একটা পাসওয়ার্ড সেট করো", isUserMessage = false)
+                _messages.value += Message(input, true)
+                _chatState.value = ChatUiState.AskForConfirmRegistrationPassword("")
+            }
+
+            is ChatUiState.AskForConfirmRegistrationPassword -> {
+                appendSystemMessage("তোমার পাসওয়ার্ড টি নিশ্চিত করো", isUserMessage = false)
+                _messages.value += Message(input, true)
+                _chatState.value = ChatUiState.AskForConfirmRegistrationPassword("")
             }
         }
     }
@@ -475,7 +502,8 @@ class ChatViewModel : ViewModel() {
 
         appendSystemMessage("তোমার নাম এবং জেন্ডার সম্পর্কে জানতে চাচ্ছিলাম", isUserMessage = false)
         _messages.value += Message(input, true)
-        appendSystemMessage("ধন্যবাদ, তোমার নাম এবং জেন্ডার জানানোর জন্য", isUserMessage = false)
+        //appendSystemMessage("ধন্যবাদ, তোমার নাম এবং জেন্ডার জানানোর জন্য", isUserMessage = false)
+        //appendSystemMessage("তোমার ক্লাস সিলেক্ট করো", isUserMessage = false)
 
         _chatState.value = ChatUiState.AskForClassNSection("")
 
@@ -537,6 +565,8 @@ sealed interface ChatUiState {
     data class WaitForPhoneNumber(val message: String) : ChatUiState
     data class WaitForPhoneNumberForUnRegisterUser(val message: String) : ChatUiState
     data class AskForPassword(val message: String) : ChatUiState
+    data class AskForRegistrationPassword(val message: String) : ChatUiState
+    data class AskForConfirmRegistrationPassword(val message: String) : ChatUiState
     object PasswordRetry : ChatUiState
     object PasswordReset : ChatUiState
     object WaitForOTP : ChatUiState
@@ -545,6 +575,7 @@ sealed interface ChatUiState {
     object OTPValidationCompleted : ChatUiState
     data class AskForName(val message: String) : ChatUiState
     data class AskForClassNSection(val message: String) : ChatUiState
+    data class AskForBatchSection(val message: String) : ChatUiState
     object AskForGender : ChatUiState
     object AskForClass : ChatUiState
     object AskForDivisionOrSection : ChatUiState
