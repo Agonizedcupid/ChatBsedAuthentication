@@ -8,7 +8,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dagger.hilt.android.lifecycle.HiltViewModel
+import com.aariyan.chatbasedauthenticationsystem.domain.ViewModelHelper
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -17,7 +17,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 enum class ResponseType {
     YES, NO
@@ -118,97 +117,89 @@ class ChatViewModel : ViewModel() {
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), false)
 
-
-    // Handle user input based on the current state
-    fun handleUserInput(input: String, responseType: ResponseType = ResponseType.YES) {
+    private val helper = ViewModelHelper()
+    // Handle user userInput based on the current state
+    fun handleUserInput(userInput: String, responseType: ResponseType = ResponseType.YES) {
         //appendSystemMessage("adfgsdfsdfgsdfg", false)
         when (val currentState = _chatState.value) {
+            // First Screen
             ChatUiState.Greeting -> {
-                appendSystemMessage("তোমার কি উৎকর্ষ একাউন্ট আছে?", isUserMessage = false)
-                _messages.value += Message(input, true)
-                //_chatState.value = ChatUiState.AskIfAccountExists
-                if (responseType == ResponseType.YES) {
-                    _chatState.value = ChatUiState.WaitForPhoneNumber("")
-                } else {
-                    _chatState.value = ChatUiState.WaitForPhoneNumberForUnRegisterUser("")
-                }
+                val (newState, messages) = helper.handleGreetingState(userInput, responseType)
+                _messages.value += messages
+                _chatState.value = newState
             }
+            // When ask for the Phone number for log in
+            is ChatUiState.WaitForPhoneNumber -> {
+                val (newState, messages) = helper.handleWaitForPhoneNumber(userInput)
+                _messages.value += messages
+                _chatState.value = newState
+            }
+
+            // When user enter password for the LogIn
+            is ChatUiState.AskForPassword -> {
+                val (newState, messages) = helper.handleAskForPassword(userInput)
+                _messages.value += messages
+                _chatState.value = newState
+            }
+            // Registration Process:
+            is ChatUiState.WaitForPhoneNumberForUnRegisterUser -> {
+                val (newState, messages) = helper.handleWaitForPhoneNumberForUnRegisterUser(userInput = userInput)
+                _messages.value += messages
+                _chatState.value = newState
+            }
+            is ChatUiState.SendOTP -> {
+                val (newState, messages) = helper.handleOTP(userInput)
+                _messages.value += messages
+                _chatState.value = newState
+            }
+            is ChatUiState.OTPValidationCompleted -> {
+                val (newState, messages) = helper.handleOTPValidationCompleted(userInput = userInput)
+                _messages.value += messages
+                _chatState.value = newState
+            }
+/////////////////////////////// Information //////////////////////////////////////////////////
+
+            is ChatUiState.AskForName -> {
+                val (newState, messages) = helper.handleNameNGender(userInput = userInput)
+                _messages.value += messages
+                _chatState.value = newState
+            }
+            is ChatUiState.AskForClassNSection -> {
+                val (newState, messages) = helper.handleClassNSection(userInput = userInput)
+                _messages.value += messages
+                _chatState.value = newState
+            }
+
+            is ChatUiState.AskForBatchSection -> {
+                val (newState, messages) = helper.handleBatchSection(userInput = userInput)
+                _messages.value += messages
+                _chatState.value = newState
+            }
+
+            is ChatUiState.AskForRegistrationPassword -> {
+                val (newState, messages) = helper.handleRegistrationPassword(userInput = userInput)
+                _messages.value += messages
+                _chatState.value = newState
+            }
+
+            is ChatUiState.AskForConfirmRegistrationPassword -> {
+                val (newState, messages) = helper.handleConfirmRegistrationPassword(userInput = userInput)
+                _messages.value += messages
+                _chatState.value = newState
+            }
+
+
+
+
+
+
+
+
+
+
 
             ChatUiState.AskIfAccountExists -> {
-                processAccountExistenceResponse(input)
-            }
-
-            is ChatUiState.WaitForPhoneNumber -> {
-                val text = buildAnnotatedString {
-                    append("আচ্ছা!  যে নম্বর দিয়ে একাউন্টটি খুলেছ সে")
-
-                    withStyle(
-                        style = SpanStyle(
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xff52B69A)
-                        )
-                    ) {
-                        append(" ফোন নম্বরটি ")
-                    }
-
-                    append("দাও প্লিজ... ")
-                }
-                appendSystemMessage(text.toString(), isUserMessage = false)
-                _messages.value += Message(input, true)
-
-                val phoneNumberExists = checkPhoneNumberExists(input)
-
-                if (phoneNumberExists) {
-                    _chatState.value = ChatUiState.AskForPassword("")
-                    //appendSystemMessage("Please enter your password:", isUserMessage = false)
-
-                } else {
-                    // If phone number does not exist, start account creation
-                    _chatState.value = ChatUiState.AccountCreation
-                    appendSystemMessage(
-                        "Let's create your account. What is your name?",
-                        isUserMessage = false
-                    )
-
-                }
-            }
-
-            is ChatUiState.AskForPassword -> {
-                val text = buildAnnotatedString {
-                    append("ধন্যবাদ, তোমার ফোন নম্বরটির বিপরীতে আমরা একটি একাউন্ট সনাক্ত করতে পেরেছি। এখন")
-
-                    withStyle(
-                        style = SpanStyle(
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xff52B69A)
-                        )
-                    ) {
-                        append(" পাসওয়ার্ড ")
-                    }
-
-                    append("দিয়ে তোমার একাউন্টে প্রবেশ করতে পারো...")
-                }
-
-                appendSystemMessage(text.toString(), isUserMessage = false)
-                _messages.value += Message(input, true)
-
-                val passwordCorrect = verifyPassword(input)
-                if (passwordCorrect) {
-                    _chatState.value = ChatUiState.AuthenticationComplete
-                    appendSystemMessage(
-                        "Authentication successful! Welcome to the application.",
-                        isUserMessage = false
-                    )
-
-                } else {
-                    _chatState.value = ChatUiState.PasswordRetry
-                    appendSystemMessage(
-                        "Incorrect password, please try again:",
-                        isUserMessage = false
-                    )
-
-                    // Implement logic for password retry and reset
-                }
+                processAccountExistenceResponse(userInput)
             }
 
             ChatUiState.AccountCreation -> {
@@ -216,10 +207,6 @@ class ChatViewModel : ViewModel() {
                 _chatState.value = ChatUiState.AskForName("What is your name?")
                 appendSystemMessage("What is your name?", isUserMessage = false)
 
-            }
-
-            is ChatUiState.AskForName -> {
-                processNameInput(input, input)
             }
 
             is ChatUiState.PasswordRetry -> {
@@ -234,8 +221,8 @@ class ChatViewModel : ViewModel() {
 
             ChatUiState.WaitForOTP -> {
                 // Verify OTP
-                // Assuming a function verifyOTP(input) exists
-                val otpVerified = verifyOTP(input)
+                // Assuming a function verifyOTP(userInput) exists
+                val otpVerified = verifyOTP(userInput)
                 if (otpVerified) {
                     // Proceed to set a new password or complete account creation
                     _chatState.value = ChatUiState.SetPassword
@@ -245,13 +232,13 @@ class ChatViewModel : ViewModel() {
             }
 
             ChatUiState.AskForGender -> {
-                processGenderSelection(input)
+                processGenderSelection(userInput)
             }
 
             ChatUiState.AskForClass -> {
                 // Process class selection
                 // Special handling for SSC or HSC
-                if (input == "SSC" || input == "HSC") {
+                if (userInput == "SSC" || userInput == "HSC") {
                     _chatState.value = ChatUiState.AskForDivisionOrSection
                 } else {
                     // Proceed to ask for batch
@@ -261,17 +248,17 @@ class ChatViewModel : ViewModel() {
 
             ChatUiState.AskForDivisionOrSection -> {
                 // Process division or section selection
-                processDivisionOrSectionSelection(input)
+                processDivisionOrSectionSelection(userInput)
                 //_chatState.value = ChatUiState.AskForBatch
             }
 
             ChatUiState.AskForBatch -> {
-                processBatchSelection(input)
+                processBatchSelection(userInput)
 
             }
 
             ChatUiState.SetPassword -> {
-                processPasswordSetting(input)
+                processPasswordSetting(userInput)
             }
 
             ChatUiState.AuthenticationComplete -> {
@@ -288,7 +275,7 @@ class ChatViewModel : ViewModel() {
 
             ChatUiState.Loading -> {
                 appendSystemMessage("আসসালামু আলাইকুম, শুভ সকাল!", isUserMessage = false)
-                _messages.value += Message(input, true)
+                _messages.value += Message(userInput, true)
                 _chatState.value = ChatUiState.Greeting
             }
 
@@ -296,80 +283,6 @@ class ChatViewModel : ViewModel() {
                 Log.d("REMAINING_OPERATION", "SUCCESS")
             }
 
-            is ChatUiState.WaitForPhoneNumberForUnRegisterUser -> {
-                val text = buildAnnotatedString {
-                    append("ধন্যবাদ, একাউন্টে প্রবেশ করতে তোমার")
-
-                    withStyle(
-                        style = SpanStyle(
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xff52B69A)
-                        )
-                    ) {
-                        append(" ফোন নম্বরটি ")
-                    }
-
-                    append("দাও প্লিজ...")
-                }
-                appendSystemMessage(text.toString(), isUserMessage = false)
-                _messages.value += Message(input, true)
-
-                val phoneNumberExists = !checkPhoneNumberExists(input)
-
-                if (phoneNumberExists) {
-                    _chatState.value = ChatUiState.AskForPassword("")
-                    //appendSystemMessage("Please enter your password:", isUserMessage = false)
-
-                } else {
-                    // If phone number does not exist, start account creation
-                    _chatState.value = ChatUiState.SendOTP
-                    //appendSystemMessage("Let's create your account. What is your name?", isUserMessage = false)
-
-                }
-            }
-
-            is ChatUiState.SendOTP -> {
-                val text = "ধন্যবাদ! এই নম্বরে প্রেরিত কোডটি মেয়াদ উত্তীর্ণ হওয়ার আগে লিখো।"
-                appendSystemMessage(text.toString(), isUserMessage = false)
-                _messages.value += Message(input, true)
-                _chatState.value = ChatUiState.OTPValidationCompleted
-            }
-
-            is ChatUiState.OTPValidationCompleted -> {
-                val text =
-                    "ধন্যবাদ, নিবন্ধনের প্রথম ধাপ সম্পন্ন হয়েছে, দ্বিতীয় ধাপে তোমার প্রোফাইল আপডেট করতে কিছু তথ্য প্রয়োজন"
-                appendSystemMessage(text.toString(), isUserMessage = false)
-                _messages.value += Message(input, true)
-                // Updated the State -> Now Go to Main Screen to handle the Ask for Name screen
-                _chatState.value = ChatUiState.AskForName("")
-            }
-
-            is ChatUiState.AskForClassNSection -> {
-                //appendSystemMessage(input, isUserMessage = false)
-                appendSystemMessage("তোমার ক্লাস সিলেক্ট করো", isUserMessage = false)
-                _messages.value += Message(input, true)
-                _chatState.value = ChatUiState.AskForBatchSection("")
-                // Updated the State -> Now Go to Main Screen to handle the Ask for Name screen
-                //_chatState.value = ChatUiState.AskForName("")
-            }
-
-            is ChatUiState.AskForBatchSection -> {
-                appendSystemMessage("তোমার ব্যাচ সিলেক্ট করো", isUserMessage = false)
-                _messages.value += Message(input, true)
-                _chatState.value = ChatUiState.AskForRegistrationPassword("")
-            }
-
-            is ChatUiState.AskForRegistrationPassword -> {
-                appendSystemMessage("একটা পাসওয়ার্ড সেট করো", isUserMessage = false)
-                _messages.value += Message(input, true)
-                _chatState.value = ChatUiState.AskForConfirmRegistrationPassword("")
-            }
-
-            is ChatUiState.AskForConfirmRegistrationPassword -> {
-                appendSystemMessage("তোমার পাসওয়ার্ড টি নিশ্চিত করো", isUserMessage = false)
-                _messages.value += Message(input, true)
-                _chatState.value = ChatUiState.AskForConfirmRegistrationPassword("")
-            }
         }
     }
 
@@ -413,7 +326,7 @@ class ChatViewModel : ViewModel() {
             // If the batch is valid, proceed to set the password
             _chatState.value = ChatUiState.SetPassword
         } else {
-            // If the input is invalid, prompt the user again
+            // If the userInput is invalid, prompt the user again
             _chatState.value =
                 ChatUiState.Error(Exception("Invalid batch. Please enter a valid batch."))
         }
@@ -431,7 +344,7 @@ class ChatViewModel : ViewModel() {
             // If the division or section is valid, proceed with the next step
             _chatState.value = ChatUiState.AskForBatch
         } else {
-            // If the input is invalid, prompt the user again
+            // If the userInput is invalid, prompt the user again
             _chatState.value =
                 ChatUiState.Error(Exception("Invalid selection. Please enter a valid division or section."))
         }
@@ -440,20 +353,20 @@ class ChatViewModel : ViewModel() {
     // Placeholder for division or section validation
     private fun validateDivisionOrSection(selection: String): Boolean {
         // Implement actual logic to validate the division or section
-        // This might include checking if the input matches predefined options
+        // This might include checking if the userInput matches predefined options
         val validDivisions = listOf("Science", "Commerce", "Arts")
         return selection in validDivisions
     }
 
-    private fun processAccountExistenceResponse(input: String) {
-        if (input.trim().equals("yes", ignoreCase = true)) {
+    private fun processAccountExistenceResponse(userInput: String) {
+        if (userInput.trim().equals("yes", ignoreCase = true)) {
             _chatState.value = ChatUiState.WaitForPhoneNumber("Please enter your phone number:")
             appendSystemMessage("Please enter your phone number:", isUserMessage = false)
-        } else if (input.trim().equals("no", ignoreCase = true)) {
+        } else if (userInput.trim().equals("no", ignoreCase = true)) {
             _chatState.value = ChatUiState.AccountCreation
             appendSystemMessage("Start the Account Creation", isUserMessage = false)
         } else {
-            // Handle invalid input
+            // Handle invalid userInput
             _chatState.value =
                 ChatUiState.Error(IllegalArgumentException("Please answer with 'yes' or 'no'"))
             appendSystemMessage("Please answer with 'yes' or 'no'", isUserMessage = false)
@@ -497,11 +410,11 @@ class ChatViewModel : ViewModel() {
         }
     }
 
-    private fun processNameInput(name: String, input: String) {
+    private fun processNameuserInput(name: String, userInput: String) {
 
 
         appendSystemMessage("তোমার নাম এবং জেন্ডার সম্পর্কে জানতে চাচ্ছিলাম", isUserMessage = false)
-        _messages.value += Message(input, true)
+        _messages.value += Message(userInput, true)
         //appendSystemMessage("ধন্যবাদ, তোমার নাম এবং জেন্ডার জানানোর জন্য", isUserMessage = false)
         //appendSystemMessage("তোমার ক্লাস সিলেক্ট করো", isUserMessage = false)
 
@@ -511,7 +424,7 @@ class ChatViewModel : ViewModel() {
 //            // If the name is valid, proceed with the next step of account creation
 //            // For example, asking for gender
 //            //_chatState.value = ChatUiState.AskForGender
-//            _messages.value += Message(input, true)
+//            _messages.value += Message(userInput, true)
 //            appendSystemMessage("ধন্যবাদ, তোমার নাম এবং জেন্ডার জানানোর জন্য", isUserMessage = false)
 //        } else {
 //            // If the name is invalid, prompt the user to enter a valid name again
@@ -536,7 +449,7 @@ class ChatViewModel : ViewModel() {
             _chatState.value = ChatUiState.AskForClass
             appendSystemMessage("Ask For Class", isUserMessage = false)
         } else {
-            // If the gender input is invalid, prompt the user again
+            // If the gender userInput is invalid, prompt the user again
             _chatState.value =
                 ChatUiState.Error(Exception("Invalid gender. Please enter 'Male' or 'Female'."))
             appendSystemMessage(
@@ -549,7 +462,7 @@ class ChatViewModel : ViewModel() {
     // Placeholder for gender validation
     private fun validateGender(gender: String): Boolean {
         // Implement actual logic to validate the gender
-        // For example, check if the input is either "Male" or "Female"
+        // For example, check if the userInput is either "Male" or "Female"
         appendSystemMessage("Validate Gender", isUserMessage = false)
         return gender.equals("male", ignoreCase = true) || gender.equals(
             "female",

@@ -51,7 +51,7 @@ fun Bubble(
                 align = if (isSender) Alignment.End else Alignment.Start
             )
             .background(backgroundColor, chatBubbleShape(density, arrowPosition))
-            .padding(start = 25.dp, top = 16.dp, bottom = 16.dp, end = 25.dp)
+            .padding(start = 15.dp, top = 16.dp, bottom = 16.dp, end = 15.dp)
     )  {
         //Text(modifier = Modifier.padding(end = 10.dp, start = 10.dp),text = message, color = Color(0xff71828A))
         content()

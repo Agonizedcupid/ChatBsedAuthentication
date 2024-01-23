@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.aariyan.chatbasedauthenticationsystem.presentation.component.BatchSelectionComponent
 import com.aariyan.chatbasedauthenticationsystem.ui.theme.ChatBasedAuthenticationSystemTheme
 
 //@Composable
@@ -114,79 +115,79 @@ fun AccountCreationScreen() {
 //    }
 }
 
-@Composable
-fun AskForNameScreen(
-    textInput: String, selectedGender: String,
-    onGenderSelected: (String) -> Unit
-) {
-    BubbleWithIcon(isUserMessage = false) {
-        ASkForNameComponent(textInput, selectedGender, onGenderSelected)
-    }
-}
+//@Composable
+//fun AskForNameScreen(
+//    textInput: String, selectedGender: String,
+//    onGenderSelected: (String) -> Unit
+//) {
+//    BubbleWithIcon(isUserMessage = false) {
+//        ASkForNameComponent(textInput, selectedGender, onGenderSelected)
+//    }
+//}
 
-@Composable
-fun AskForClassNSectionScreen(
-    selectedPosition: Int, selectedOption: String, onOptionSelected: (String) -> Unit,
-    selectedClass: String, onClassSelected: (String) -> Unit, submitInfo: ()-> Unit
-) {
-    BubbleWithIcon(isUserMessage = false) {
-        ClassSectionSelectionComponent(
-            selectedPosition = selectedPosition,
-            selectedOption = selectedOption,
-            onOptionSelected = onOptionSelected,
-            selectedClass = selectedClass,
-            onClassSelected = onClassSelected,
-            submitInfo = submitInfo
-        )
-    }
-}
+//@Composable
+//fun AskForClassNSectionScreen(
+//    selectedPosition: Int, selectedOption: String, onOptionSelected: (String) -> Unit,
+//    selectedClass: String, onClassSelected: (String) -> Unit, submitInfo: ()-> Unit
+//) {
+//    BubbleWithIcon(isUserMessage = false) {
+//        ClassSectionSelectionComponent(
+//            selectedPosition = selectedPosition,
+//            selectedOption = selectedOption,
+//            onOptionSelected = onOptionSelected,
+//            selectedClass = selectedClass,
+//            onClassSelected = onClassSelected,
+//            submitInfo = submitInfo
+//        )
+//    }
+//}
 
-@Composable
-fun AskForBatchSelectionScreen(
-    selectedPosition: Int,
-    selectedBatchYear: String,
-    onBatchYearSelected: (String) ->
-    Unit, onSubmitClick: ()-> Unit
-) {
-    BubbleWithIcon(isUserMessage = false) {
-        BatchSelectionComponent(
-            selectedPosition = selectedPosition,
-            selectedBatchYear = selectedBatchYear,
-            onBatchYearSelected = onBatchYearSelected,
-            onSubmitClick = onSubmitClick
-        )
-    }
-}
+//@Composable
+//fun AskForBatchSelectionScreen(
+//    selectedPosition: Int,
+//    selectedBatchYear: String,
+//    onBatchYearSelected: (String) ->
+//    Unit, onSubmitClick: ()-> Unit
+//) {
+//    BubbleWithIcon(isUserMessage = false) {
+//        BatchSelectionComponent(
+//            selectedPosition = selectedPosition,
+//            selectedBatchYear = selectedBatchYear,
+//            onBatchYearSelected = onBatchYearSelected,
+//            onSubmitClick = onSubmitClick
+//        )
+//    }
+//}
 
-@Composable
-fun AskForRegPasswordScreen(
-    selectedPosition: Int,
-    password: String,
-    //onSubmitClick: ()-> Unit
-) {
-    BubbleWithIcon(isUserMessage = false) {
-        SetPasswordComponent(
-            selectedPosition = selectedPosition,
-            password = password,
-            //onSubmitClick = onSubmitClick
-        )
-    }
-}
+//@Composable
+//fun AskForRegPasswordScreen(
+//    selectedPosition: Int,
+//    password: String,
+//    //onSubmitClick: ()-> Unit
+//) {
+//    BubbleWithIcon(isUserMessage = false) {
+//        SetPasswordComponent(
+//            selectedPosition = selectedPosition,
+//            password = password,
+//            //onSubmitClick = onSubmitClick
+//        )
+//    }
+//}
 
-@Composable
-fun AskForConfirmRegPasswordScreen(
-    selectedPosition: Int,
-    password: String,
-    //onSubmitClick: ()-> Unit
-) {
-    BubbleWithIcon(isUserMessage = false) {
-        ConfirmPasswordComponent(
-            selectedPosition = selectedPosition,
-            password = password,
-            //onSubmitClick = onSubmitClick
-        )
-    }
-}
+//@Composable
+//fun AskForConfirmRegPasswordScreen(
+//    selectedPosition: Int,
+//    password: String,
+//    //onSubmitClick: ()-> Unit
+//) {
+//    BubbleWithIcon(isUserMessage = false) {
+//        ConfirmPasswordComponent(
+//            selectedPosition = selectedPosition,
+//            password = password,
+//            //onSubmitClick = onSubmitClick
+//        )
+//    }
+//}
 
 @Preview
 @Composable
@@ -270,34 +271,34 @@ fun AuthenticationCompleteScreen() {
     Text("You are successfully authenticated. Welcome!")
 }
 
-@Composable
-fun GreetingScreen(yesBtn: () -> Unit, noBtn: () -> Unit) {
-    BubbleWithIcon(isUserMessage = false) {
-        GreetingComponent(yesBtn = { yesBtn() }, noBtn = { noBtn() })
-    }
+//@Composable
+//fun GreetingScreen(yesBtn: () -> Unit, noBtn: () -> Unit) {
+//    BubbleWithIcon(isUserMessage = false) {
+//        GreetingComponent(yesBtn = { yesBtn() }, noBtn = { noBtn() })
+//    }
+//
+//}
 
-}
+//@Composable
+//fun UnregisterUserPhoneNumberScree() {
+//    BubbleWithIcon(isUserMessage = false) {
+//        UnregisterUserWaitingNumberScreenComponent()
+//    }
+//}
 
-@Composable
-fun UnregisterUserPhoneNumberScree() {
-    BubbleWithIcon(isUserMessage = false) {
-        UnregisterUserWaitingNumberScreenComponent()
-    }
-}
+//@Composable
+//fun SendOTPScreen(viewModel: ChatViewModel) {
+//    BubbleWithIcon(isUserMessage = false) {
+//        SendOTPScreenComponent("+8801732394777", viewModel)
+//    }
+//}
 
-@Composable
-fun SendOTPScreen(viewModel: ChatViewModel) {
-    BubbleWithIcon(isUserMessage = false) {
-        SendOTPScreenComponent("+8801732394777", viewModel)
-    }
-}
-
-@Composable
-fun OTPValidationCompletedScreen(onStart: () -> Unit) {
-    BubbleWithIcon(isUserMessage = false) {
-        OTPValidationCompletedComponent(onStart = { onStart() })
-    }
-}
+//@Composable
+//fun OTPValidationCompletedScreen(onStart: () -> Unit) {
+//    BubbleWithIcon(isUserMessage = false) {
+//        OTPValidationCompletedComponent(onStart = { onStart() })
+//    }
+//}
 
 
 @Composable
@@ -320,6 +321,16 @@ fun WaitForPhoneNumberScreen() {
 fun AskForPasswordScreen() {
     BubbleWithIcon(isUserMessage = false) {
         AskForPasswordScreenComponent()
+    }
+}
+
+@Composable
+@Preview
+fun PreviewAskForPasswordScreen() {
+    BoxWithConstraints {
+        ChatBasedAuthenticationSystemTheme {
+            AskForPasswordScreen()
+        }
     }
 }
 

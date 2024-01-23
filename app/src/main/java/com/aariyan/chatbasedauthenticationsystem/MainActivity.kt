@@ -34,6 +34,17 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.aariyan.chatbasedauthenticationsystem.presentation.component.AskAccountExistOrNotScreen
+import com.aariyan.chatbasedauthenticationsystem.presentation.component.AskForBatchSelectionScreen
+import com.aariyan.chatbasedauthenticationsystem.presentation.component.AskForClassNSectionScreen
+import com.aariyan.chatbasedauthenticationsystem.presentation.component.AskForConfirmRegPasswordScreen
+import com.aariyan.chatbasedauthenticationsystem.presentation.component.AskForLogInPasswordScreenComponent
+import com.aariyan.chatbasedauthenticationsystem.presentation.component.AskForNameScreen
+import com.aariyan.chatbasedauthenticationsystem.presentation.component.AskForRegPasswordScreen
+import com.aariyan.chatbasedauthenticationsystem.presentation.component.LogInPasswordEnteringScreen
+import com.aariyan.chatbasedauthenticationsystem.presentation.component.OTPValidationCompletedScreen
+import com.aariyan.chatbasedauthenticationsystem.presentation.component.SendOTPScreen
+import com.aariyan.chatbasedauthenticationsystem.presentation.component.UnregisterUserPhoneNumberScreen
 import com.aariyan.chatbasedauthenticationsystem.ui.theme.ChatBasedAuthenticationSystemTheme
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -142,7 +153,8 @@ fun ChatBased() {
             item {
                 when (chatState) {
                     is ChatUiState.Loading -> LoadingScreen()
-                    is ChatUiState.Greeting -> GreetingScreen(
+                    // Completed
+                    is ChatUiState.Greeting -> AskAccountExistOrNotScreen(
                         yesBtn = {
                             viewModel.handleUserInput(
                                 "জি, আমার একাউন্ট আছে!",
@@ -157,17 +169,29 @@ fun ChatBased() {
                         }
                     )
 
+                    // Completed
                     is ChatUiState.AskForName -> AskForNameScreen(
                         textInput,
                         selectedGender,
                         onGenderSelected = { newGender ->
                             selectedGender = newGender
                             viewModel.updateGender(newGender)
-                        })
+                        }, onSubmitClick = {
+                            if (!viewModel.isValidName(textInput)) {
+                                Toast.makeText(context, "নামটি বৈধ নয়", Toast.LENGTH_SHORT)
+                                    .show()
+                            } else {
+                                viewModel.handleUserInput("আমার নাম: ${textInput}, এবং জেন্ডার:  ${selectedGender}")
+                            }
+                        }
+                    )
 
                     is ChatUiState.AskIfAccountExists -> AskIfAccountExistsScreen()
+                    // Completed
                     is ChatUiState.WaitForPhoneNumber -> WaitForPhoneNumberScreen()
-                    is ChatUiState.AskForPassword -> AskForPasswordScreen()
+                    // Completed, TODO: AskForPassword should be renamed to AskForLogInPassword
+                    is ChatUiState.AskForPassword -> LogInPasswordEnteringScreen()
+
                     is ChatUiState.PasswordRetry -> PasswordRetryScreen()
                     is ChatUiState.PasswordReset -> PasswordResetScreen()
                     is ChatUiState.WaitForOTP -> WaitForOTPScreen()
@@ -177,17 +201,26 @@ fun ChatBased() {
                     is ChatUiState.AskForDivisionOrSection -> AskForDivisionOrSectionScreen()
                     is ChatUiState.AskForBatch -> AskForBatchScreen()
                     is ChatUiState.SetPassword -> SetPasswordScreen()
+
+
                     is ChatUiState.AuthenticationComplete -> AuthenticationCompleteScreen()
                     is ChatUiState.Error -> ErrorScreen((chatState as ChatUiState.Error).exception.message)
                     is ChatUiState.Success -> SuccessScreen((chatState as ChatUiState.Success).message)
-                    is ChatUiState.WaitForPhoneNumberForUnRegisterUser -> UnregisterUserPhoneNumberScree()
-                    is ChatUiState.SendOTP -> SendOTPScreen(viewModel)
+
+
+                    // Completed
+                    is ChatUiState.WaitForPhoneNumberForUnRegisterUser -> UnregisterUserPhoneNumberScreen()
+
+                    // Completed
+                    is ChatUiState.SendOTP -> SendOTPScreen(viewModel, "")
+
+                    // Completed
                     ChatUiState.OTPValidationCompleted -> OTPValidationCompletedScreen(
                         onStart = {
-                            viewModel.handleUserInput(input = "ঠিক আছে, শুরু করা যাক...")
+                            viewModel.handleUserInput(userInput = "ঠিক আছে, শুরু করা যাক...")
                         }
                     )
-
+                    // Completed
                     is ChatUiState.AskForClassNSection -> AskForClassNSectionScreen(
                         selectedPosition = 1,
                         selectedOption = selectedSection,
@@ -204,6 +237,7 @@ fun ChatBased() {
                         }
                     )
 
+                    // Completed
                     is ChatUiState.AskForBatchSection -> AskForBatchSelectionScreen(
                         selectedPosition = 2,
                         selectedBatchYear = selectedBatchYear,
@@ -216,18 +250,18 @@ fun ChatBased() {
                         }
                     )
 
+                    // Completed
                     is ChatUiState.AskForRegistrationPassword-> AskForRegPasswordScreen(
                         selectedPosition = 3,
                         password = textInput
                     )
+                    //Completed
                     is ChatUiState.AskForConfirmRegistrationPassword-> AskForConfirmRegPasswordScreen(
                         selectedPosition = 3,
                         password = textInput
                     )
                 }
             }
-
-            //Spacer(modifier = Modifier.weight(1f))
         }
 
 
@@ -235,7 +269,8 @@ fun ChatBased() {
             //Spacer(modifier = Modifier.weight(1f))
             Divider(color = Color(0xffF0F7FC), thickness = 1.dp)
             Row(
-                verticalAlignment = Alignment.CenterVertically
+                modifier = Modifier.padding(start = 15.dp, end = 15.dp),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Box(
                     modifier = Modifier
@@ -317,12 +352,12 @@ fun ChatBased() {
                         } else if (chatState is ChatUiState.SendOTP) {
                             viewModel.handleUserInput(textInput)
                         } else if (chatState is ChatUiState.AskForName) {
-                            if (!viewModel.isValidName(textInput)) {
-                                Toast.makeText(context, "নামটি বৈধ নয়", Toast.LENGTH_SHORT)
-                                    .show()
-                            } else {
-                                viewModel.handleUserInput("আমার নাম: ${textInput}, এবং জেন্ডার:  ${selectedGender}")
-                            }
+//                            if (!viewModel.isValidName(textInput)) {
+//                                Toast.makeText(context, "নামটি বৈধ নয়", Toast.LENGTH_SHORT)
+//                                    .show()
+//                            } else {
+//                                viewModel.handleUserInput("আমার নাম: ${textInput}, এবং জেন্ডার:  ${selectedGender}")
+//                            }
                         } else {
                             viewModel.handleUserInput("")
                         }
@@ -534,7 +569,7 @@ fun ChatBubble(text: String, isUserMessage: Boolean) {
         //Bubble(message = text, isSender = false)
         BubbleWithIcon(isUserMessage = isUserMessage) {
             //Bubble(content = { Text(text = text) }, isSender = isUserMessage)
-            Text(text = text, style = TextStyle(color = Color(0xff71828A)))
+            Text(modifier = Modifier.padding(start = 5.dp, end = 5.dp),text = text, style = TextStyle(color = Color(0xff71828A)))
         }
     }
 }
